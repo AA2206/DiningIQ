@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Add enums for better type safety
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MealType {
+  Breakfast
+  Lunch
+  Dinner
+  Brunch
+}
+
+enum Goal {
+  LOSE_WEIGHT
+  GAIN_WEIGHT
+  MAINTAIN
+  BUILD_MUSCLE
+}
+
+enum DietType {
+  VEGETARIAN
+  VEGAN
+  OMNIVORE
+  KETO
+  // etc.
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String    @unique // or email
+  passcode          String    // hashed password
+  gender            Gender?
+  frequency         String?   // or create enum if limited options
+  height            Float?    // in cm or inches
+  weight            Float?    // in kg or lbs
+  age               Int?
+  goal              Goal?
+  diet              DietType?
+  other             String?
+  mealPlan          Json?
+  mealPlanPopulated Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Meal {
+  id              Int       @id @default(autoincrement())
+  username        String
+  mealName        String
+  mealDescription String?
+  meal            MealType
+  date            DateTime
+  diningHall      String
+  servingSize     Int       @default(1)
+  entrees         Json
+  totalCalories   Int
+  totalProtein    Float
+  totalCarbs      Float
+  totalFats       Float
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([username, date])
+  @@index([date])
+}
+
+model UMD_Dining {
+  id                    Int       @id @default(autoincrement())
+  entree                String
+  diningHall            String
+  meal                  MealType
+  dietaryInformation    String?
+  category              String
+  totalCalories         Int
+  totalFat              Int
+  totalCarbohydrate     Int
+  saturatedFat          Int
+  dietaryFiber          Int
+  transFat              Int
+  totalSugars           Int
+  cholesterol           Int
+  sodium                Int
+  protein               Int
+  
+  @@index([diningHall, meal])
+}
+
+model MealStats {
+  id          Int       @id @default(autoincrement())
+  username    String
+  date        DateTime
+  meal        MealType
+  calories    Int
+  protein     Float
+  fats        Int
+  carbs       Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([username, date])
+  @@index([date])
+}
