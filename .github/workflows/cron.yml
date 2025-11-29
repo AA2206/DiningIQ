@@ -28,6 +28,8 @@ jobs:
       - name: Generate Prisma Client
         working-directory: ./backend
         run: npx prisma generate
+        env:
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run meal generation
         working-directory: ./backend
