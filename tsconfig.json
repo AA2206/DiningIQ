@@ -12,6 +12,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "backend/src/Meal-Plan/meal-generation.js",
+    "nativewind-env.d.ts"
   ]
 }
