@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import express from 'express'; 
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { use } from 'react';
+import crypto from 'crypto';
 import { z } from 'zod';
 
 // Load environment variables
@@ -302,10 +302,60 @@ app.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+// POST /google-auth - Handle Google Sign-In
+app.post('/google-auth', async (req: Request, res: Response) => {
+  const { email } = req.body;
+  // Note: name and googleId can be extracted from req.body if needed for user profiles
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    // Check if user exists with this email as username
+    let user = await prisma.user.findUnique({
+      where: { username: email }
+    });
+
+    let isNewUser = false;
+
+    if (!user) {
+      // Create new user for Google sign-in
+      // Generate a random secure password (user won't need it - they'll always use Google)
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await prisma.user.create({
+        data: {
+          username: email,
+          passcode: hashedPassword,
+        }
+      });
+      isNewUser = true;
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { username: user.username, id: user.id },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json({ 
+      token, 
+      userId: user.id,
+      isNewUser,  // Frontend can use this to redirect to onboarding
+    });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // ========== USER INFO ROUTES ==========
 
 // JWT Authentication Middleware
-const authenticateJWT = (req: Request, res: Response, next: express.NextFunction) => {
+const authenticateJWT = (req: Request, res: Response, next: express.NextFunction): void => {
   const authHeader = req.headers.authorization;
 
   if (authHeader) {
@@ -313,7 +363,8 @@ const authenticateJWT = (req: Request, res: Response, next: express.NextFunction
 
     jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
       if (err) {
-        return res.status(403).json({ error: 'Invalid or expired token' });
+        res.status(403).json({ error: 'Invalid or expired token' });
+        return;
       }
       (req as any).user = user; // { username, id }
       next();
@@ -322,6 +373,70 @@ const authenticateJWT = (req: Request, res: Response, next: express.NextFunction
     res.status(401).json({ error: 'Authorization header missing' });
   }
 };
+
+// GET /user-profile - Get user profile data
+app.get('/user-profile', authenticateJWT, async (req: Request, res: Response) => {
+  const username = (req as any).user?.username;
+
+  if (!username) {
+    return res.status(401).json({ error: 'Username missing from token' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+      select: {
+        username: true,
+        gender: true,
+        frequency: true,
+        height: true,
+        weight: true,
+        age: true,
+        goal: true,
+        diet: true,
+        other: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Map enum values back to display values
+    const genderMap: Record<string, string> = {
+      'MALE': 'Male',
+      'FEMALE': 'Female',
+      'OTHER': 'Other'
+    };
+
+    const goalMap: Record<string, string> = {
+      'BUILD_MUSCLE': 'Build Muscle',
+      'LOSE_WEIGHT': 'Get Lean',
+      'MAINTAIN': 'Improve Fitness'
+    };
+
+    const dietMap: Record<string, string> = {
+      'OMNIVORE': 'Classic',
+      'VEGETARIAN': 'Vegetarian',
+      'VEGAN': 'Vegan'
+    };
+
+    return res.status(200).json({
+      username: user.username,
+      gender: user.gender ? genderMap[user.gender] || user.gender : null,
+      frequency: user.frequency,
+      height: user.height,
+      weight: user.weight,
+      age: user.age,
+      goal: user.goal ? goalMap[user.goal] || user.goal : null,
+      diet: user.diet ? dietMap[user.diet] || user.diet : null,
+      other: user.other,
+    });
+  } catch (error: any) {
+    console.error('Error fetching user profile:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // POST /update-field
 app.post('/update-field', authenticateJWT, async (req: Request, res: Response) => {
@@ -577,9 +692,22 @@ app.get('/fetchAllEntrees', authenticateJWT, async (req: Request, res: Response)
   }
 
   try {
-    const mealFilter = mealType === "Brunch" 
-      ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
-      : mealType as any;
+    // Determine which meal types to include based on the selected meal type
+    let mealFilter: any;
+    
+    if (mealType === "Brunch") {
+      // Brunch shows: Breakfast + Lunch + Brunch
+      mealFilter = { in: ["Brunch", "Breakfast", "Lunch"] as any[] };
+    } else if (mealType === "Breakfast") {
+      // Breakfast shows: Breakfast + Brunch
+      mealFilter = { in: ["Breakfast", "Brunch"] as any[] };
+    } else if (mealType === "Lunch") {
+      // Lunch shows: Lunch + Brunch
+      mealFilter = { in: ["Lunch", "Brunch"] as any[] };
+    } else {
+      // Dinner shows: Just Dinner
+      mealFilter = mealType as any;
+    }
 
     const entrees = await prisma.uMD_Dining.findMany({
       where: {
@@ -1200,6 +1328,124 @@ app.put('/update-meal', authenticateJWT, async (req: Request, res: Response) => 
   }
 });
 
+// POST /verify-entrees - Check if entrees exist for a specific meal type before copying a meal (by name)
+app.post('/verify-entrees', authenticateJWT, async (req: Request, res: Response) => {
+  const { entreeNames, mealType, diningHall } = req.body;
+
+  if (!entreeNames || !Array.isArray(entreeNames) || entreeNames.length === 0) {
+    return res.status(400).json({ error: 'entreeNames (non-empty array) is required' });
+  }
+
+  if (!mealType) {
+    return res.status(400).json({ error: 'mealType is required' });
+  }
+
+  if (!diningHall) {
+    return res.status(400).json({ error: 'diningHall is required' });
+  }
+
+  // Validate mealType
+  const validMealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Brunch'];
+  if (!validMealTypes.includes(mealType)) {
+    return res.status(400).json({ 
+      error: `mealType must be one of: ${validMealTypes.join(', ')}` 
+    });
+  }
+
+  try {
+    // Determine which meal types to check based on the selected meal type
+    // For Brunch, check Breakfast, Lunch, and Brunch
+    const mealFilter = mealType === "Brunch"
+      ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
+      : mealType as any;
+
+    // Fetch entrees from UMD_Dining for the specific meal type and dining hall by name
+    const existingEntrees = await prisma.uMD_Dining.findMany({
+      where: {
+        entree: { in: entreeNames },
+        meal: mealFilter,
+        diningHall: diningHall
+      },
+      select: {
+        id: true,
+        entree: true,
+        meal: true,
+        diningHall: true
+      }
+    });
+
+    const foundNames = existingEntrees.map(e => e.entree);
+    const missingNames = entreeNames.filter((name: string) => !foundNames.includes(name));
+
+    if (missingNames.length > 0) {
+      return res.status(200).json({
+        valid: false,
+        missingNames: missingNames,
+        message: `Some entrees are not available for ${mealType} at ${diningHall}`
+      });
+    }
+
+    return res.status(200).json({
+      valid: true,
+      message: `All entrees are available for ${mealType} at ${diningHall}`
+    });
+  } catch (error) {
+    console.error('Error verifying entrees:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /get-entrees-by-names - Look up current entree IDs by name for a meal type and dining hall
+app.post('/get-entrees-by-names', authenticateJWT, async (req: Request, res: Response) => {
+  const { entreeNames, mealType, diningHall } = req.body;
+
+  if (!entreeNames || !Array.isArray(entreeNames) || entreeNames.length === 0) {
+    return res.status(400).json({ error: 'entreeNames (non-empty array) is required' });
+  }
+
+  if (!mealType || !diningHall) {
+    return res.status(400).json({ error: 'mealType and diningHall are required' });
+  }
+
+  // Validate mealType
+  const validMealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Brunch'];
+  if (!validMealTypes.includes(mealType)) {
+    return res.status(400).json({ 
+      error: `mealType must be one of: ${validMealTypes.join(', ')}` 
+    });
+  }
+
+  try {
+    // Determine which meal types to check based on the selected meal type
+    // For Brunch, check Breakfast, Lunch, and Brunch
+    const mealFilter = mealType === "Brunch"
+      ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
+      : mealType as any;
+
+    // Fetch entrees from UMD_Dining by name for the specific meal type and dining hall
+    const existingEntrees = await prisma.uMD_Dining.findMany({
+      where: {
+        entree: { in: entreeNames },
+        meal: mealFilter,
+        diningHall: diningHall
+      },
+      select: {
+        id: true,
+        entree: true,
+        meal: true,
+        diningHall: true
+      }
+    });
+
+    return res.status(200).json({
+      entrees: existingEntrees
+    });
+  } catch (error) {
+    console.error('Error looking up entrees:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // POST /add-meal
 app.post('/add-meal', authenticateJWT, async (req: Request, res: Response) => {
   const { mealName, mealDescription, mealType, date, diningHall, entrees, servingSize } = req.body;
@@ -1397,7 +1643,9 @@ app.post('/add-meal', authenticateJWT, async (req: Request, res: Response) => {
 });
 
 // GET /weekly-macros
+// Optional query param: date (ISO string) - defaults to today if not provided
 app.get('/weekly-macros', authenticateJWT, async (req: Request, res: Response) => {
+  const dateParam = req.query.date as string | undefined;
   const username = (req as any).user?.username;
 
   if (!username) {
@@ -1411,20 +1659,27 @@ app.get('/weekly-macros', authenticateJWT, async (req: Request, res: Response) =
     const carbs: number[] = new Array(7).fill(0);
     const fats: number[] = new Array(7).fill(0);
 
-    // Calculate previous Monday and upcoming Sunday
-    const today = new Date();
-    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    // Use provided date or default to today
+    const referenceDate = dateParam ? new Date(dateParam) : new Date();
     
-    // Calculate days to subtract to get to Monday (if today is Sunday, go back 6 days)
+    // Validate the date
+    if (isNaN(referenceDate.getTime())) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    // Calculate previous Monday and upcoming Sunday based on reference date
+    const currentDay = referenceDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    // Calculate days to subtract to get to Monday (if reference day is Sunday, go back 6 days)
     const daysToMonday = currentDay === 0 ? 6 : currentDay - 1;
-    const previousMonday = new Date(today);
-    previousMonday.setDate(today.getDate() - daysToMonday);
+    const previousMonday = new Date(referenceDate);
+    previousMonday.setDate(referenceDate.getDate() - daysToMonday);
     previousMonday.setHours(0, 0, 0, 0);
 
-    // Calculate days to add to get to Sunday (if today is Sunday, add 0 days)
+    // Calculate days to add to get to Sunday (if reference day is Sunday, add 0 days)
     const daysToSunday = currentDay === 0 ? 0 : 7 - currentDay;
-    const upcomingSunday = new Date(today);
-    upcomingSunday.setDate(today.getDate() + daysToSunday);
+    const upcomingSunday = new Date(referenceDate);
+    upcomingSunday.setDate(referenceDate.getDate() + daysToSunday);
     upcomingSunday.setHours(23, 59, 59, 999);
 
     // Fetch all MealStats entries between Monday and Sunday

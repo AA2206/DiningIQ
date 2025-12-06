@@ -9,6 +9,11 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 async function generateResponse(user_query, meal_type) {
+    // Only Brunch needs special handling - include Breakfast, Lunch, and Brunch items
+    const mealFilter = meal_type === "Brunch" 
+      ? { in: ["Brunch", "Breakfast", "Lunch"] }
+      : meal_type;
+
     const allMenuData = await prisma.uMD_Dining.findMany({
         select: {
             id: true,
@@ -19,7 +24,7 @@ async function generateResponse(user_query, meal_type) {
             category: true
         },
         where: {
-            meal: meal_type
+            meal: mealFilter
         }
     });
 

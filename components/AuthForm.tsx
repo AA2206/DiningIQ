@@ -1,5 +1,5 @@
 // components/AuthForm.tsx
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
 import { Link } from "expo-router";
 import { useState, forwardRef, useImperativeHandle } from "react";
 import '../global.css';
@@ -7,6 +7,8 @@ import '../global.css';
 interface AuthFormProps {
   title: string;
   handleSubmit: (username: string, password: string) => void;
+  onGoogleSignIn?: () => void;
+  isGoogleLoading?: boolean;
 }
 
 export interface AuthFormRef {
@@ -16,6 +18,8 @@ export interface AuthFormRef {
 const AuthForm = forwardRef<AuthFormRef, AuthFormProps>(({
   title,
   handleSubmit,
+  onGoogleSignIn,
+  isGoogleLoading = false,
 }, ref) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -100,6 +104,41 @@ const AuthForm = forwardRef<AuthFormRef, AuthFormProps>(({
                 Submit
               </Text>
             </TouchableOpacity>
+
+            {/* Divider */}
+            {onGoogleSignIn && (
+              <>
+                <View className="flex-row items-center my-6">
+                  <View className="flex-1 h-px bg-gray-200" />
+                  <Text className="mx-4 text-gray-500 text-sm">or</Text>
+                  <View className="flex-1 h-px bg-gray-200" />
+                </View>
+
+                {/* Google Sign-In Button */}
+                <TouchableOpacity
+                  className="w-full bg-white border border-gray-300 py-4 rounded-xl flex-row items-center justify-center"
+                  onPress={onGoogleSignIn}
+                  activeOpacity={0.8}
+                  disabled={isGoogleLoading}
+                >
+                  {isGoogleLoading ? (
+                    <ActivityIndicator size="small" color="#4285F4" />
+                  ) : (
+                    <>
+                      {/* Google Logo SVG represented as colored circles/text */}
+                      <View className="w-6 h-6 mr-3 items-center justify-center">
+                        <Text className="text-lg font-bold">
+                          <Text style={{ color: '#4285F4' }}>G</Text>
+                        </Text>
+                      </View>
+                      <Text className="text-gray-700 text-lg font-semibold">
+                        Continue with Google
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </View>

@@ -5,7 +5,7 @@ export default function Goal() {
   return (
     <Question
       title="What is your goal?"
-      options={["Build Muscle", "Get Lean", "Improve Fitness"]}
+      options={["Build Muscle", "Lose Weight", "Maintain Fitness"]}
       link="/onboarding/diet"
       field="goal"
     />

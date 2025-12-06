@@ -82,7 +82,7 @@ export default function Other() {
 
         {/* Submit Button */}
         <TouchableOpacity
-          className={`w-full bg-black py-4 px-6 rounded-2xl items-center ${
+          className={`w-full bg-blue-600 py-4 px-6 rounded-2xl items-center ${
             loading ? "opacity-50" : ""
           }`}
           onPress={handleSubmit}

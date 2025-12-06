@@ -1,8 +1,11 @@
 // app/account/mealLogging.tsx
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import MealCard from '../../components/MealCard';
 import '../../global.css';
 
@@ -67,7 +70,7 @@ export default function MealLogging() {
 
   // State: Current week start (Monday)
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
-    const today = new Date();
+    const today = selectedDate
     const day = today.getDay();
     const monday = new Date(today);
     monday.setDate(today.getDate() - day + (day === 0 ? -6 : 1)); // Adjust to Monday
@@ -75,11 +78,60 @@ export default function MealLogging() {
     return monday;
   });
 
+  // Copy Modal State
+  const [copyModalVisible, setCopyModalVisible] = useState(false);
+  const [mealToCopy, setMealToCopy] = useState<MealData | null>(null);
+  const [selectedCopyMealType, setSelectedCopyMealType] = useState<string>("");
+  const [copyingMeal, setCopyingMeal] = useState(false);
+  const [verifyingCopy, setVerifyingCopy] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
+  const [availableMealTypes, setAvailableMealTypes] = useState<string[]>([]);
+
   // API Base URL
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
   // Dining Hall Options
   const DINING_HALLS = ["South Campus", "Yahentamitsi Dining Hall", "251 North"];
+
+  // Helper function to calculate effective date
+  // - Before 4 AM: yesterday (can still edit/add previous day)
+  // - 4 AM to 5:59 AM: no access (returns null)
+  // - 6 AM or later: today (can edit/add current day)
+  function getEffectiveDate(): Date | null {
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // 4 AM to 5:59 AM: no access
+    if (hour >= 4 && hour < 6) {
+      return null;
+    }
+    
+    const effectiveDate = new Date(now);
+    
+    // Before 4 AM: use yesterday as effective date
+    if (hour < 4) {
+      effectiveDate.setDate(now.getDate() - 1);
+    }
+    // 6 AM or later: use today as effective date (already set)
+    
+    effectiveDate.setHours(0, 0, 0, 0);
+    return effectiveDate;
+  }
+
+  // Helper function to check if a date is accessible for adding/editing meals
+  function isDateAccessible(date: Date): boolean {
+    const effectiveDate = getEffectiveDate();
+    
+    // If no effective date (4-6 AM window), no dates are accessible
+    if (!effectiveDate) {
+      return false;
+    }
+    
+    const dateToCheck = new Date(date);
+    dateToCheck.setHours(0, 0, 0, 0);
+    
+    return dateToCheck.getTime() === effectiveDate.getTime();
+  }
 
   // Function to fetch meals for a given date
   async function fetchMeals(date: Date) {
@@ -178,6 +230,30 @@ export default function MealLogging() {
     fetchMeals(selectedDate);
   }, [selectedDate]);
 
+  // Reset to effective date and refetch data when page comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      const effectiveDate = getEffectiveDate();
+      
+      // If no effective date (4-6 AM window), use today for viewing but no add/edit access
+      const dateToUse = effectiveDate || new Date();
+      dateToUse.setHours(0, 0, 0, 0);
+      
+      // Reset selected date
+      setSelectedDate(dateToUse);
+      
+      // Recalculate week start for current week
+      const day = dateToUse.getDay();
+      const monday = new Date(dateToUse);
+      monday.setDate(dateToUse.getDate() - day + (day === 0 ? -6 : 1)); // Adjust to Monday
+      monday.setHours(0, 0, 0, 0);
+      setCurrentWeekStart(monday);
+      
+      // Refetch meals for the date
+      fetchMeals(dateToUse);
+    }, [])
+  );
+
   // Helper function to get week dates (Monday through Sunday)
   function getWeekDates(weekStart: Date): Date[] {
     const dates: Date[] = [];
@@ -204,6 +280,48 @@ export default function MealLogging() {
 
   // Get array of week dates
   const weekDates = getWeekDates(currentWeekStart);
+
+  // Navigation functions for swipe gestures
+  const goToPreviousWeek = useCallback(() => {
+    setCurrentWeekStart((prev) => {
+      const newWeekStart = new Date(prev);
+      newWeekStart.setDate(prev.getDate() - 7);
+      return newWeekStart;
+    });
+    setSelectedDate((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(prev.getDate() - 7);
+      return newDate;
+    });
+  }, []);
+
+  const goToNextWeek = useCallback(() => {
+    setCurrentWeekStart((prev) => {
+      const newWeekStart = new Date(prev);
+      newWeekStart.setDate(prev.getDate() + 7);
+      return newWeekStart;
+    });
+    setSelectedDate((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(prev.getDate() + 7);
+      return newDate;
+    });
+  }, []);
+
+  // Swipe gesture for week navigation (like Google Calendar)
+  const swipeGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20]) // Only activate for horizontal swipes
+    .onEnd((event) => {
+      'worklet';
+      const swipeThreshold = 50;
+      if (event.translationX > swipeThreshold) {
+        // Swipe right - go to previous week
+        runOnJS(goToPreviousWeek)();
+      } else if (event.translationX < -swipeThreshold) {
+        // Swipe left - go to next week
+        runOnJS(goToNextWeek)();
+      }
+    });
 
   // Helper function to get the appropriate meal Map
   function getMealMap(mealType: string): Map<string, MealData> {
@@ -263,6 +381,207 @@ export default function MealLogging() {
     setModalVisible(true);
 
     setSelectedEntrees(entreesMap);
+  }
+
+  // Get available meal types for today based on day of week
+  function getAvailableMealTypes(): string[] {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    
+    // Weekends: Saturday (6) or Sunday (0)
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return ["Brunch", "Dinner"];
+    }
+    
+    // Weekdays: Monday (1) through Friday (5)
+    return ["Breakfast", "Lunch", "Dinner"];
+  }
+
+  // Handle opening copy modal for a meal
+  async function handleCopyMeal(meal: MealData) {
+    const effectiveDate = getEffectiveDate();
+    const mealDate = new Date(meal.date);
+    mealDate.setHours(0, 0, 0, 0);
+    const isEffectiveDate = effectiveDate ? mealDate.getTime() === effectiveDate.getTime() : false;
+    
+    setMealToCopy(meal);
+    setSelectedCopyMealType(""); // Reset selection
+    setCopyError(null);
+    
+    // Get available meal types, excluding the current meal's type if copying from effective date
+    const allAvailableTypes = getAvailableMealTypes();
+    const availableTypes = isEffectiveDate 
+      ? allAvailableTypes.filter(type => type !== meal.mealType) // Exclude current meal type
+      : allAvailableTypes; // Can copy to any meal type if from past
+    
+    setAvailableMealTypes(availableTypes);
+    setCopyModalVisible(true);
+  }
+
+  // Verify entrees for selected meal type (by name)
+  async function verifyEntreesForMealType(mealType: string) {
+    if (!mealToCopy || !mealType) return;
+
+    setVerifyingCopy(true);
+    setCopyError(null);
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setCopyError("Not authenticated");
+        setVerifyingCopy(false);
+        return;
+      }
+
+      // Extract entree names (not IDs)
+      const entreeNames = mealToCopy.entrees.map(e => e.entree);
+      
+      const response = await fetch(`${API_BASE_URL}/verify-entrees`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          entreeNames, 
+          mealType,
+          diningHall: mealToCopy.diningHall 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.valid) {
+        setCopyError(
+          `Cannot copy to ${mealType}: The following items are not available:\n${data.missingNames.join(', ')}`
+        );
+      }
+    } catch (error) {
+      console.error("Error verifying entrees:", error);
+      setCopyError("Failed to verify meal items. Please try again.");
+    } finally {
+      setVerifyingCopy(false);
+    }
+  }
+
+  // Handle confirming the copy
+  async function handleConfirmCopy() {
+    if (!mealToCopy || copyError || !selectedCopyMealType) return;
+
+    try {
+      setCopyingMeal(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.error("Not authenticated");
+        return;
+      }
+
+      // Determine target date: effective date if meal is from past, same date if from effective date
+      const effectiveDate = getEffectiveDate();
+      if (!effectiveDate) {
+        setCopyError("Cannot copy meals during 4-6 AM window. Please try again after 6 AM.");
+        setCopyingMeal(false);
+        return;
+      }
+      
+      const mealDate = new Date(mealToCopy.date);
+      mealDate.setHours(0, 0, 0, 0);
+      const isEffectiveDate = mealDate.getTime() === effectiveDate.getTime();
+      const targetDate = isEffectiveDate ? mealDate : effectiveDate; // Same day if copying from effective date, effective date if from past
+
+      // Look up current entree IDs by name for the selected meal type and dining hall
+      const entreeNames = mealToCopy.entrees.map(e => e.entree);
+      
+      // First, get the current IDs for these entree names
+      const lookupResponse = await fetch(`${API_BASE_URL}/get-entrees-by-names`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          entreeNames,
+          mealType: selectedCopyMealType,
+          diningHall: mealToCopy.diningHall
+        }),
+      });
+
+      if (!lookupResponse.ok) {
+        setCopyError("Failed to look up current menu items");
+        setCopyingMeal(false);
+        return;
+      }
+
+      const lookupData = await lookupResponse.json();
+      
+      // Map entree names to their current IDs and serving sizes
+      const entrees: Array<{ id: number; servingSize: number }> = [];
+      const missingEntrees: string[] = [];
+      
+      for (const originalEntree of mealToCopy.entrees) {
+        const currentEntree = lookupData.entrees.find((e: any) => e.entree === originalEntree.entree);
+        if (!currentEntree) {
+          missingEntrees.push(originalEntree.entree);
+        } else {
+          entrees.push({
+            id: currentEntree.id,
+            servingSize: originalEntree.servingSize || 1,
+          });
+        }
+      }
+
+      if (missingEntrees.length > 0) {
+        setCopyError(`Some items are no longer available: ${missingEntrees.join(', ')}`);
+        setCopyingMeal(false);
+        return;
+      }
+
+      // Copy with selected meal type
+      const payload = {
+        mealName: mealToCopy.mealName,
+        mealDescription: mealToCopy.mealDescription,
+        mealType: selectedCopyMealType, // Use selected meal type, not original
+        date: targetDate.toISOString(),
+        diningHall: mealToCopy.diningHall,
+        entrees: entrees,
+        servingSize: mealToCopy.servingSize,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/add-meal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        // Close modal and refresh
+        setCopyModalVisible(false);
+        setMealToCopy(null);
+        setSelectedCopyMealType("");
+        setCopyError(null);
+        
+        // Refresh meals if viewing the target date
+        const targetDateStart = new Date(targetDate);
+        targetDateStart.setHours(0, 0, 0, 0);
+        const selectedStart = new Date(selectedDate);
+        selectedStart.setHours(0, 0, 0, 0);
+        
+        if (targetDateStart.getTime() === selectedStart.getTime()) {
+          fetchMeals(selectedDate);
+        }
+      } else {
+        const data = await response.json();
+        setCopyError(data.error || "Failed to copy meal");
+      }
+    } catch (error) {
+      console.error("Error copying meal:", error);
+      setCopyError("Network error. Please try again.");
+    } finally {
+      setCopyingMeal(false);
+    }
   }
 
   // Handle removing a meal from the appropriate hashmap and backend
@@ -580,6 +899,13 @@ export default function MealLogging() {
 
       if (editingMeal) {
         // EDIT MODE: Update existing meal
+        // Check if meal is on accessible date
+        if (!isDateAccessible(editingMeal.date)) {
+          console.error("Cannot edit meal: not on accessible date");
+          // TODO: Show error message to user
+          return;
+        }
+
         const requestBody = {
           mealId: editingMeal.id,
           mealName: mealName.trim(),
@@ -635,11 +961,20 @@ export default function MealLogging() {
         }
       } else {
         // ADD MODE: Create new meal
+        // Always use effective date when adding meals
+        const effectiveDate = getEffectiveDate();
+        
+        if (!effectiveDate) {
+          console.error("Cannot add meal: not in accessible time window (4-6 AM)");
+          // TODO: Show error message to user
+          return;
+        }
+        
         const requestBody = {
           mealName: mealName.trim(),
           mealDescription: mealDescription.trim() || "",
           mealType: modalMealType,
-          date: selectedDate.toISOString(),
+          date: effectiveDate.toISOString(),
           diningHall: diningHall,
           entrees: entrees,
           servingSize: 1, // Overall meal serving size (default 1)
@@ -694,61 +1029,71 @@ export default function MealLogging() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
       <ScrollView className="flex-1">
-        {/* Date Selector */}
-        <View className="bg-white px-2 py-4 border-b border-gray-200">
-          <View className="flex-row items-center justify-between">
-            {weekDates.map((date, index) => {
-              const isSelected = date.toDateString() === selectedDate.toDateString();
-              return (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => setSelectedDate(date)}
-                  className={`flex-1 items-center py-2.5 rounded-full mx-1 ${
-                    isSelected ? "bg-green-600" : "bg-transparent"
-                  }`}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    className={`text-xs font-medium mb-0.5 ${
-                      isSelected ? "text-white" : "text-gray-700"
+        {/* Date Selector - Swipe left/right to change week */}
+        <GestureDetector gesture={swipeGesture}>
+          <View className="bg-white px-3 py-4">
+            <View className="flex-row items-center justify-between">
+              {weekDates.map((date, index) => {
+                const isSelected = date.toDateString() === selectedDate.toDateString();
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setSelectedDate(date)}
+                    className={`items-center py-3 px-3 rounded-xl ${
+                      isSelected ? "bg-blue-600" : "bg-transparent"
                     }`}
+                    activeOpacity={0.7}
                   >
-                    {getDayName(date)}
-                  </Text>
-                  <Text
-                    className={`text-xs font-medium ${
-                      isSelected ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {getDateString(date)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                    <Text
+                      className={`text-sm font-semibold mb-1 ${
+                        isSelected ? "text-white" : "text-gray-600"
+                      }`}
+                    >
+                      {getDayName(date)}
+                    </Text>
+                    <Text
+                      className={`text-sm font-medium ${
+                        isSelected ? "text-white" : "text-gray-500"
+                      }`}
+                    >
+                      {getDateString(date)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
-        </View>
+        </GestureDetector>
 
         {/* Meal Sections */}
         <View className="px-4 py-6">
           {/* Breakfast Header */}
-          <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-3xl font-bold text-gray-900">Breakfast</Text>
-            <TouchableOpacity
-              onPress={() => handleAddMeal("Breakfast")}
-              className="w-10 h-10 bg-green-600 rounded-full items-center justify-center shadow-sm"
-              activeOpacity={0.8}
-            >
-              <Text className="text-white text-xl font-bold">+</Text>
-            </TouchableOpacity>
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-2xl font-bold text-gray-900">Breakfast</Text>
+            {isDateAccessible(selectedDate) && (
+              <TouchableOpacity
+                onPress={() => handleAddMeal("Breakfast")}
+                className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center shadow-md"
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-2xl font-bold">+</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Breakfast Meal Cards */}
           {breakfastMeals.size === 0 ? (
-            <Text className="text-gray-500 text-sm italic mb-4">
-              No meals logged yet. Tap the + button to add one.
-            </Text>
+            <View className="bg-gray-50 rounded-xl p-4 mb-4 border border-dashed border-gray-300">
+              <View className="flex-row items-center">
+                <Text className="text-gray-400 mr-2">✨</Text>
+                <Text className="text-gray-500 text-sm italic">
+                  No meals logged yet. Tap the + button to add one.
+                </Text>
+              </View>
+            </View>
           ) : (
             <View className="gap-4 mb-6">
               {Array.from(breakfastMeals.values()).map((meal) => (
@@ -760,7 +1105,9 @@ export default function MealLogging() {
                   totalProtein={meal.totalProtein}
                   entrees={meal.entrees}
                   servingSize={meal.servingSize}
+                  isEditable={isDateAccessible(meal.date)}
                   onEdit={() => handleEditMeal(meal)}
+                  onCopy={() => handleCopyMeal(meal)}
                   onRemove={() => handleRemoveMeal("Breakfast", meal.id, meal.mealName)}
                   onIncreaseServing={() => handleIncreaseServing("Breakfast", meal.id, meal.mealName)}
                   onDecreaseServing={() => handleDecreaseServing("Breakfast", meal.id, meal.mealName)}
@@ -770,22 +1117,29 @@ export default function MealLogging() {
           )}
 
           {/* Lunch Header */}
-          <View className="flex-row items-center justify-between mb-6 mt-8">
-            <Text className="text-3xl font-bold text-gray-900">Lunch</Text>
-            <TouchableOpacity
-              onPress={() => handleAddMeal("Lunch")}
-              className="w-10 h-10 bg-green-600 rounded-full items-center justify-center shadow-sm"
-              activeOpacity={0.8}
-            >
-              <Text className="text-white text-xl font-bold">+</Text>
-            </TouchableOpacity>
+          <View className="flex-row items-center justify-between mb-4 mt-8">
+            <Text className="text-2xl font-bold text-gray-900">Lunch</Text>
+            {isDateAccessible(selectedDate) && (
+              <TouchableOpacity
+                onPress={() => handleAddMeal("Lunch")}
+                className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center shadow-md"
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-2xl font-bold">+</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Lunch Meal Cards */}
           {lunchMeals.size === 0 ? (
-            <Text className="text-gray-500 text-sm italic mb-4">
-              No meals logged yet. Tap the + button to add one.
-            </Text>
+            <View className="bg-gray-50 rounded-xl p-4 mb-4 border border-dashed border-gray-300">
+              <View className="flex-row items-center">
+                <Text className="text-gray-400 mr-2">✨</Text>
+                <Text className="text-gray-500 text-sm italic">
+                  No meals logged yet. Tap the + button to add one.
+                </Text>
+              </View>
+            </View>
           ) : (
             <View className="gap-4 mb-6">
               {Array.from(lunchMeals.values()).map((meal) => (
@@ -797,7 +1151,9 @@ export default function MealLogging() {
                   totalProtein={meal.totalProtein}
                   entrees={meal.entrees}
                   servingSize={meal.servingSize}
+                  isEditable={isDateAccessible(meal.date)}
                   onEdit={() => handleEditMeal(meal)}
+                  onCopy={() => handleCopyMeal(meal)}
                   onRemove={() => handleRemoveMeal("Lunch", meal.id, meal.mealName)}
                   onIncreaseServing={() => handleIncreaseServing("Lunch", meal.id, meal.mealName)}
                   onDecreaseServing={() => handleDecreaseServing("Lunch", meal.id, meal.mealName)}
@@ -807,22 +1163,29 @@ export default function MealLogging() {
           )}
 
           {/* Dinner Header */}
-          <View className="flex-row items-center justify-between mb-6 mt-8">
-            <Text className="text-3xl font-bold text-gray-900">Dinner</Text>
-            <TouchableOpacity
-              onPress={() => handleAddMeal("Dinner")}
-              className="w-10 h-10 bg-green-600 rounded-full items-center justify-center shadow-sm"
-              activeOpacity={0.8}
-            >
-              <Text className="text-white text-xl font-bold">+</Text>
-            </TouchableOpacity>
+          <View className="flex-row items-center justify-between mb-4 mt-8">
+            <Text className="text-2xl font-bold text-gray-900">Dinner</Text>
+            {isDateAccessible(selectedDate) && (
+              <TouchableOpacity
+                onPress={() => handleAddMeal("Dinner")}
+                className="w-12 h-12 bg-blue-600 rounded-full items-center justify-center shadow-md"
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-2xl font-bold">+</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Dinner Meal Cards */}
           {dinnerMeals.size === 0 ? (
-            <Text className="text-gray-500 text-sm italic mb-4">
-              No meals logged yet. Tap the + button to add one.
-            </Text>
+            <View className="bg-gray-50 rounded-xl p-4 mb-4 border border-dashed border-gray-300">
+              <View className="flex-row items-center">
+                <Text className="text-gray-400 mr-2">✨</Text>
+                <Text className="text-gray-500 text-sm italic">
+                  No meals logged yet. Tap the + button to add one.
+                </Text>
+              </View>
+            </View>
           ) : (
             <View className="gap-4 mb-6">
               {Array.from(dinnerMeals.values()).map((meal) => (
@@ -834,7 +1197,9 @@ export default function MealLogging() {
                   totalProtein={meal.totalProtein}
                   entrees={meal.entrees}
                   servingSize={meal.servingSize}
+                  isEditable={isDateAccessible(meal.date)}
                   onEdit={() => handleEditMeal(meal)}
+                  onCopy={() => handleCopyMeal(meal)}
                   onRemove={() => handleRemoveMeal("Dinner", meal.id, meal.mealName)}
                   onIncreaseServing={() => handleIncreaseServing("Dinner", meal.id, meal.mealName)}
                   onDecreaseServing={() => handleDecreaseServing("Dinner", meal.id, meal.mealName)}
@@ -1037,6 +1402,149 @@ export default function MealLogging() {
           </View>
         </View>
       </Modal>
+
+      {/* Copy Meal Modal */}
+      <Modal
+        visible={copyModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setCopyModalVisible(false);
+          setMealToCopy(null);
+          setSelectedCopyMealType("");
+          setCopyError(null);
+        }}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-4">
+          <View className="bg-white rounded-2xl w-full max-w-md p-6">
+            {/* Header */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-2xl font-bold text-gray-900">
+                {(() => {
+                  const effectiveDate = getEffectiveDate();
+                  if (!effectiveDate) return "Copy Meal";
+                  const mealDate = new Date(mealToCopy?.date || new Date());
+                  mealDate.setHours(0, 0, 0, 0);
+                  return mealDate.getTime() === effectiveDate.getTime() ? "Copy to Another Meal" : "Copy to Current Day";
+                })()}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => {
+                  setCopyModalVisible(false);
+                  setMealToCopy(null);
+                  setSelectedCopyMealType("");
+                  setCopyError(null);
+                }} 
+                activeOpacity={0.7}
+              >
+                <Text className="text-2xl text-gray-500">✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Meal Info */}
+            {mealToCopy && (
+              <View className="bg-gray-50 p-4 rounded-xl mb-4">
+                <Text className="text-lg font-semibold text-gray-900">{mealToCopy.mealName}</Text>
+                <Text className="text-sm text-gray-600 mt-1">{mealToCopy.mealType} • {mealToCopy.diningHall}</Text>
+                <Text className="text-xs text-gray-500 mt-2">
+                  {mealToCopy.entrees.length} item{mealToCopy.entrees.length !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            )}
+
+            {/* Verifying State */}
+            {verifyingCopy && (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" color="#2563eb" />
+                <Text className="text-gray-600 mt-2">Verifying meal items...</Text>
+              </View>
+            )}
+
+            {/* Error Message */}
+            {copyError && !verifyingCopy && (
+              <View className="bg-red-50 border border-red-200 p-4 rounded-xl mb-4">
+                <Text className="text-red-700 text-sm">{copyError}</Text>
+              </View>
+            )}
+
+            {/* Meal Type Selection */}
+            {!verifyingCopy && (
+              <>
+                {/* Meal Type Selection */}
+                <View className="mb-4">
+                  <Text className="text-base font-semibold text-gray-700 mb-3">Copy to which meal type?</Text>
+                  <View className={`flex-row gap-2 ${availableMealTypes.length === 2 ? 'justify-center' : ''}`}>
+                    {availableMealTypes.map((mealType) => (
+                      <TouchableOpacity
+                        key={mealType}
+                        onPress={() => {
+                          setSelectedCopyMealType(mealType);
+                          verifyEntreesForMealType(mealType);
+                        }}
+                        className={`${availableMealTypes.length === 2 ? 'flex-1' : 'flex-1'} py-3 px-4 rounded-xl border-2 ${
+                          selectedCopyMealType === mealType
+                            ? "bg-blue-600 border-blue-600"
+                            : "bg-white border-gray-300"
+                        }`}
+                        activeOpacity={0.7}
+                      >
+                        <Text
+                          className={`text-sm font-semibold text-center ${
+                            selectedCopyMealType === mealType ? "text-white" : "text-gray-700"
+                          }`}
+                        >
+                          {mealType}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Success/Error Message after meal type selection */}
+                {selectedCopyMealType && !verifyingCopy && !copyError && (
+                  <View className="bg-green-50 border border-green-200 p-4 rounded-xl mb-4">
+                    <Text className="text-green-700 text-sm">✓ All items are available for {selectedCopyMealType}. Ready to copy!</Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* Copy Button */}
+            <TouchableOpacity
+              onPress={handleConfirmCopy}
+              disabled={verifyingCopy || !!copyError || copyingMeal || !selectedCopyMealType}
+              className={`w-full py-4 rounded-xl items-center ${
+                verifyingCopy || copyError || copyingMeal || !selectedCopyMealType
+                  ? "bg-gray-300"
+                  : "bg-blue-600"
+              }`}
+              activeOpacity={0.8}
+            >
+              {copyingMeal ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text className={`text-lg font-semibold ${
+                  verifyingCopy || copyError || !selectedCopyMealType ? "text-gray-500" : "text-white"
+                }`}>
+                  {selectedCopyMealType 
+                    ? (() => {
+                        const effectiveDate = getEffectiveDate();
+                        if (!effectiveDate) return "Not Available (4-6 AM)";
+                        const mealDate = new Date(mealToCopy?.date || new Date());
+                        mealDate.setHours(0, 0, 0, 0);
+                        const isEffectiveDate = mealDate.getTime() === effectiveDate.getTime();
+                        return isEffectiveDate 
+                          ? `Copy to ${selectedCopyMealType}` 
+                          : `Copy to Current Day's ${selectedCopyMealType}`;
+                      })()
+                    : "Select Meal Type"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }

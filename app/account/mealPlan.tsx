@@ -1,13 +1,18 @@
 // app/mealplan.tsx
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Dimensions, FlatList, Alert } from "react-native";
 import { useEffect, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MealOptionCard from '../../components/MealOptionCard';
 import '../../global.css';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = SCREEN_WIDTH - 48;
+
 interface Entree {
   id: number;
   entree: string;
+  servingSize: number;
 }
 
 interface MealOption {
@@ -28,6 +33,7 @@ export default function MealPlan() {
   const [mealPlan, setMealPlan] = useState<MealPlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addingMealKey, setAddingMealKey] = useState<string | null>(null);
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
@@ -67,14 +73,116 @@ export default function MealPlan() {
     }
   }
 
-  // Flatten meal options from all dining halls for a meal type
+  // Convert dining hall key to display name for storage
+  function formatDiningHallName(hall: string): string {
+    const diningHallMap: { [key: string]: string } = {
+      'South_Campus_Dining_Hall': 'South Campus',
+      'south_campus_dining_hall': 'South Campus',
+      'Yahentamitsi_Dining_Hall': 'Yahentamitsi Dining Hall',
+      'yahentamitsi_dining_hall': 'Yahentamitsi Dining Hall',
+      'North_251_Dining_Hall': '251 North',
+      'north_251_dining_hall': '251 North',
+      '251_North': '251 North',
+    };
+    return diningHallMap[hall] || hall;
+  }
+
+  // Helper function to calculate effective date
+  // - Before 4 AM: yesterday (can still edit/add previous day)
+  // - 4 AM to 5:59 AM: no access (returns null)
+  // - 6 AM or later: today (can edit/add current day)
+  function getEffectiveDate(): Date | null {
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // 4 AM to 5:59 AM: no access
+    if (hour >= 4 && hour < 6) {
+      return null;
+    }
+    
+    const resultDate = new Date(now);
+    
+    // Before 4 AM: use yesterday as effective date
+    if (hour < 4) {
+      resultDate.setDate(now.getDate() - 1);
+    }
+    // 6 AM or later: use today as effective date (already set)
+    
+    resultDate.setHours(0, 0, 0, 0);
+    return resultDate;
+  }
+
+  async function handleAddMeal(
+    mealOption: MealOption,
+    diningHall: string,
+    mealType: string,
+    uniqueKey: string
+  ) {
+    try {
+      setAddingMealKey(uniqueKey);
+      
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Not authenticated. Please login again.");
+        return;
+      }
+
+      const entrees = mealOption.Entrees.map((entree) => ({
+        id: entree.id,
+        servingSize: entree.servingSize || 1,
+      }));
+
+      // Map Brunch meals to Lunch in Meal Logging
+      const targetMealType = mealType === "Brunch" ? "Lunch" : mealType;
+
+      // Use effective date instead of current date
+      const targetDate = getEffectiveDate();
+      
+      if (!targetDate) {
+        Alert.alert("Error", "Cannot add meals during 4-6 AM window. Please try again after 6 AM.");
+        setAddingMealKey(null);
+        return;
+      }
+
+      const payload = {
+        mealName: mealOption.Meal_Option,
+        mealDescription: mealOption.Description,
+        mealType: targetMealType, // Brunch → Lunch, others stay the same
+        date: targetDate.toISOString(),
+        diningHall: formatDiningHallName(diningHall),
+        entrees: entrees,
+        servingSize: 1,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/add-meal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", `${mealOption.Meal_Option} added to your meal log!`);
+      } else {
+        const data = await response.json();
+        Alert.alert("Error", data.error || "Failed to add meal");
+      }
+    } catch (err: any) {
+      console.error("Error adding meal:", err);
+      Alert.alert("Error", "Network error. Please try again.");
+    } finally {
+      setAddingMealKey(null);
+    }
+  }
+
   function getMealOptionsForType(mealType: string): Array<{ mealOption: MealOption; diningHall: string }> {
     if (!mealPlan || !mealPlan[mealType]) return [];
     
     const mealTypeData = mealPlan[mealType];
     const allOptions: Array<{ mealOption: MealOption; diningHall: string }> = [];
     
-    // Combine options from all dining halls, preserving dining hall info
     Object.entries(mealTypeData).forEach(([diningHall, diningHallOptions]) => {
       diningHallOptions.forEach((option) => {
         allOptions.push({ mealOption: option, diningHall });
@@ -84,83 +192,106 @@ export default function MealPlan() {
     return allOptions;
   }
 
-  // Get all meal types from the meal plan
   function getMealTypes(): string[] {
     if (!mealPlan) return [];
-    return Object.keys(mealPlan);
+    const preferredOrder = ['Breakfast', 'Brunch', 'Lunch', 'Dinner'];
+    const availableTypes = Object.keys(mealPlan);
+    return availableTypes.sort((a, b) => {
+      const indexA = preferredOrder.indexOf(a);
+      const indexB = preferredOrder.indexOf(b);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
   }
 
-  // Format meal type name for display
   function formatMealType(mealType: string): string {
     return mealType.charAt(0).toUpperCase() + mealType.slice(1);
   }
 
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-50 items-center justify-center">
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center" edges={['top']}>
         <ActivityIndicator size="large" color="#2563eb" />
         <Text className="text-gray-600 mt-4">Loading your meal plan...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 bg-gray-50 items-center justify-center px-6">
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center px-6" edges={['top']}>
         <Text className="text-red-600 text-lg font-semibold text-center">
           {error}
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (!mealPlan) {
     return (
-      <View className="flex-1 bg-gray-50 items-center justify-center px-6">
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center px-6" edges={['top']}>
         <Text className="text-gray-600 text-lg text-center">
           No meal plan found. Please generate one first.
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const mealTypes = getMealTypes();
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="px-4 py-6">
+    <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
+      <ScrollView className="flex-1">
+        <View className="px-4 pt-6 pb-4">
+          <Text className="text-4xl font-bold text-gray-900 mb-2">
+            Meal Plan
+          </Text>
+          <Text className="text-base text-gray-600">
+            Curated meals for optimal nutrition
+          </Text>
+        </View>
+
         {mealTypes.map((mealType, index) => {
           const mealOptions = getMealOptionsForType(mealType);
           
           return (
-            <View key={mealType} className={index > 0 ? "mt-8" : ""}>
-              {/* Meal Type Header */}
-              <Text className="text-3xl font-bold text-gray-900 mb-4">
+            <View key={mealType} className={index > 0 ? "mt-6" : ""}>
+              <Text className="text-2xl font-bold text-gray-900 mb-4 px-4">
                 {formatMealType(mealType)}
               </Text>
 
-              {/* Swipable Meal Option Cards */}
-              <ScrollView
+              <FlatList
+                data={mealOptions}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                pagingEnabled={false}
-                snapToInterval={340} // Card width + margin
+                snapToInterval={CARD_WIDTH + 12}
+                snapToAlignment="start"
                 decelerationRate="fast"
-                contentContainerStyle={{ paddingRight: 16 }}
-              >
-                {mealOptions.map(({ mealOption, diningHall }, optionIndex) => (
-                  <View
-                    key={optionIndex}
-                    style={{ width: 340, marginRight: 16 }}
-                  >
-                    <MealOptionCard mealOption={mealOption} diningHall={diningHall} />
-                  </View>
-                ))}
-              </ScrollView>
+                contentContainerStyle={{ paddingHorizontal: 16 }}
+                ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                renderItem={({ item: { mealOption, diningHall }, index: idx }) => {
+                  const uniqueKey = `${mealType}-${diningHall}-${idx}`;
+                  return (
+                    <View style={{ width: CARD_WIDTH }}>
+                      <MealOptionCard 
+                        mealOption={mealOption} 
+                        diningHall={diningHall}
+                        onAddMeal={() => handleAddMeal(mealOption, diningHall, mealType, uniqueKey)}
+                        isAdding={addingMealKey === uniqueKey}
+                      />
+                    </View>
+                  );
+                }}
+                keyExtractor={(_, idx) => idx.toString()}
+              />
             </View>
           );
         })}
-      </View>
-    </ScrollView>
+        
+        <View className="h-6" />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 // components/MealCard.tsx
 import { View, Text, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import '../global.css';
 
 interface Entree {
@@ -15,8 +16,10 @@ interface MealCardProps {
   totalProtein: number;
   entrees: Entree[];
   servingSize: number;
+  isEditable?: boolean;
   onRemove?: () => void;
   onEdit?: () => void;
+  onCopy?: () => void;
   onIncreaseServing?: () => void;
   onDecreaseServing?: () => void;
 }
@@ -28,16 +31,16 @@ export default function MealCard({
   totalProtein,
   entrees,
   servingSize,
+  isEditable = true,
   onRemove,
   onEdit,
+  onCopy,
   onIncreaseServing,
   onDecreaseServing,
 }: MealCardProps) {
   // Calculate display macros (base macros * serving size)
   const displayCalories = Math.round(totalCalories * servingSize);
   const displayProtein = (totalProtein * servingSize).toFixed(1);
-
-  console.log(entrees)
 
   return (
     <View className="bg-white rounded-xl p-4 shadow-md border border-gray-200">
@@ -47,7 +50,16 @@ export default function MealCard({
           {mealName}
         </Text>
         <View className="flex-row items-center gap-2">
-          {onEdit && (
+          {onCopy && (
+            <TouchableOpacity
+              onPress={onCopy}
+              className="w-6 h-6 items-center justify-center"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="copy-outline" size={18} color="#2563eb" />
+            </TouchableOpacity>
+          )}
+          {onEdit && isEditable && (
             <TouchableOpacity
               onPress={onEdit}
               className="w-6 h-6 items-center justify-center"
@@ -91,7 +103,7 @@ export default function MealCard({
               onPress={onDecreaseServing}
               disabled={servingSize <= 1}
               className={`w-8 h-8 items-center justify-center rounded-full ${
-                servingSize <= 1 ? 'bg-gray-200' : 'bg-green-600'
+                servingSize <= 1 ? 'bg-gray-200' : 'bg-blue-600'
               }`}
               activeOpacity={0.7}
             >
@@ -104,7 +116,7 @@ export default function MealCard({
             </Text>
             <TouchableOpacity
               onPress={onIncreaseServing}
-              className="w-8 h-8 items-center justify-center bg-green-600 rounded-full"
+              className="w-8 h-8 items-center justify-center bg-blue-600 rounded-full"
               activeOpacity={0.7}
             >
               <Text className="text-lg font-bold text-white">+</Text>
@@ -140,7 +152,6 @@ export default function MealCard({
               
               // Only render if we have a valid entree name
               if (!entreeName) {
-                console.log('Entree without name:', entree);
                 return null;
               }
               
@@ -161,4 +172,3 @@ export default function MealCard({
     </View>
   );
 }
-

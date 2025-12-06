@@ -42,7 +42,7 @@ export default function Loading() {
         setStatus("Meal plan generated successfully!");
         // Navigate to meal plan screen after a brief delay
         setTimeout(() => {
-          router.push("/account" as any); // Adjust route as needed
+          router.replace("/account" as any); // Adjust route as needed
         }, 1000);
       } else {
         const data = await response.json();

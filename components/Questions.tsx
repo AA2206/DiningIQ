@@ -34,7 +34,7 @@ export default function Question({
         key={index}
         onPress={() => setSelectedIndex(index)}
         className={`w-full py-4 px-6 rounded-xl mb-3 items-center ${
-          isSelected ? "bg-black" : "bg-white border-2 border-gray-200"
+          isSelected ? "bg-blue-600" : "bg-white border-2 border-gray-200"
         }`}
         activeOpacity={0.7}
       >
@@ -112,7 +112,7 @@ export default function Question({
 
         {/* Continue Button */}
         <TouchableOpacity
-          className={`w-full bg-black py-4 px-6 rounded-2xl items-center ${
+          className={`w-full bg-blue-600 py-4 px-6 rounded-2xl items-center ${
             loading || selectedIndex === null ? "opacity-50" : ""
           }`}
           onPress={sendData}
