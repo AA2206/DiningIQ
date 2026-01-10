@@ -55,7 +55,7 @@ async function generateResponse(user_query, meal_type) {
     }); 
 
     const { object: mealPlan} = await generateObject({
-      model: google('gemini-2.5-pro'), 
+      model: google('gemini-2.5-flash-lite'), 
       schema: mealPlanSchema,
       system: "You are a expert dietition that can gives users meal recommendations based on their dietary preferences and goals.",
       prompt: "Using the attached dining hall nutrition database generate meal options for the users at all 3 dining halls (South Campus, Yahentamitsi Dining Hall, and 251 North)" +
