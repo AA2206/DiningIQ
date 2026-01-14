@@ -1,0 +1,2628 @@
+{
+  "aagarw24@terpmail.umd.edu": {
+    "Breakfast": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Omelet Station Veggie & Cheddar Build",
+          "Description": "High-protein vegetarian omelet assembled at the station: liquid eggs cooked with mushrooms and spinach, finished with shredded cheddar. Add a side of veggie hash for extra fiber and slow-digesting carbs to support muscle growth.",
+          "Entrees": [
+            {
+              "id": 64984,
+              "entree": "Liquid Eggs (Omelet Station)"
+            },
+            {
+              "id": 64999,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65001,
+              "entree": "Spinach"
+            },
+            {
+              "id": 64997,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 64988,
+              "entree": "Mushroom, Spinach & Tomato Vegetable Hash"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Sprouts Vegan Protein Pancake & Sausage",
+          "Description": "Plant-powered breakfast featuring vegan cheddar-spinach scrambled “eggs,” a gluten-free pancake, and vegan breakfast sausage—balanced proteins and carbs for sustained energy and muscle repair.",
+          "Entrees": [
+            {
+              "id": 65031,
+              "entree": "Vegan Cheddar Spinach Scrambled Eggs"
+            },
+            {
+              "id": 65034,
+              "entree": "Vegan Pancake Gluten Free"
+            },
+            {
+              "id": 65028,
+              "entree": "Vegan Breakfast Sausage"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Greek Yogurt Parfait",
+          "Description": "Creamy vanilla Greek yogurt topped with granola, fresh blueberries, and strawberries—protein plus quality carbs for a lean bulk-friendly start.",
+          "Entrees": [
+            {
+              "id": 65155,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65094,
+              "entree": "Cereal Granola"
+            },
+            {
+              "id": 65106,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 65109,
+              "entree": "Fresh Strawberry"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Chef's Table Triple-Egg Muscle Plate",
+          "Description": "A vegetarian, high-protein trio—classic scrambled eggs, egg whites for lean protein, and pepper jack scrambled eggs for flavor—ideal for building muscle with quality amino acids.",
+          "Entrees": [
+            {
+              "id": 64907,
+              "entree": "Scrambled Eggs"
+            },
+            {
+              "id": 64906,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 64908,
+              "entree": "Scrambled Eggs Tomato Pepper Jack Cheese"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Yogurt Parfait with Granola & Berries",
+          "Description": "Plain yogurt layered with granola, blueberries, and strawberries—an easy, protein-plus-carb combo that supports recovery and steady energy.",
+          "Entrees": [
+            {
+              "id": 64953,
+              "entree": "Yogurt Plain"
+            },
+            {
+              "id": 64921,
+              "entree": "Cereal Granola"
+            },
+            {
+              "id": 64931,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 64933,
+              "entree": "Fresh Strawberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Grill Works Vegan Protein Stack",
+          "Description": "Vegan breakfast sausage paired with a fluffy vegan chocolate chip pancake for a plant-based protein boost with workout-fueling carbs.",
+          "Entrees": [
+            {
+              "id": 64895,
+              "entree": "Vegan Breakfast Sausage"
+            },
+            {
+              "id": 64896,
+              "entree": "Vegan Chocolate Chip Pancake (purple)"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Smash Burger Egg Power Plate",
+          "Description": "Muscle-focused vegetarian plate: scrambled eggs plus a hard-boiled egg for extra protein, with hash brown rounds and blueberry pancakes to replenish glycogen.",
+          "Entrees": [
+            {
+              "id": 64936,
+              "entree": "Scrambled Eggs"
+            },
+            {
+              "id": 64924,
+              "entree": "Hard Boiled Egg (Breakfast)"
+            },
+            {
+              "id": 64926,
+              "entree": "Hash Browns Rounds"
+            },
+            {
+              "id": 64932,
+              "entree": "Pancakes Blueberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Bagel & Greek Yogurt Parfait",
+          "Description": "Hearty bagel with cream cheese alongside vanilla Greek yogurt topped with blueberries—balanced protein and carbs for a strong start to the day.",
+          "Entrees": [
+            {
+              "id": 65021,
+              "entree": "Bagels"
+            },
+            {
+              "id": 65075,
+              "entree": "Plain Cream Cheese"
+            },
+            {
+              "id": 65084,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65051,
+              "entree": "Fresh Blueberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Vegan Plant-Powered Pancake & Sausage",
+          "Description": "Vegan sausage for protein, a chocolate chip pancake for carbs, soy-free yogurt, and breakfast potatoes—plant-based fuel to support gains.",
+          "Entrees": [
+            {
+              "id": 65099,
+              "entree": "Vegan Breakfast Sausage"
+            },
+            {
+              "id": 65102,
+              "entree": "Vegan Chocolate Chip Pancake (purple)"
+            },
+            {
+              "id": 65114,
+              "entree": "Vegan Vanilla Soy-Free Yogurt"
+            },
+            {
+              "id": 65090,
+              "entree": "Breakfast Potato Sliced Pepper Onion"
+            }
+          ]
+        }
+      ]
+    },
+    "Lunch": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Salad Bar High-Protein Veggie Bowl",
+          "Description": "A muscle-building salad featuring tofu, edamame, black beans, and garbanzos over mixed greens and kale, finished with balsamic dressing for a fiber-rich, high-protein vegetarian meal.",
+          "Entrees": [
+            {
+              "id": 65716,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65586,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65572,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65707,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65760,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65689,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65698,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 65692,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65566,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Woks Tofu and Veggie Rice Bowl",
+          "Description": "Stir-fry style bowl with tofu and edamame over sticky rice, loaded with broccoli, spinach, and green beans, tossed in General Tso's Sauce for a satisfying protein and carb combo.",
+          "Entrees": [
+            {
+              "id": 65953,
+              "entree": "Sticky Rice"
+            },
+            {
+              "id": 65961,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65923,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65895,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65951,
+              "entree": "Spinach"
+            },
+            {
+              "id": 65933,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 65931,
+              "entree": "General Tso's Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Breakfast Sides Egg White Power Plate",
+          "Description": "A protein-forward breakfast-for-lunch plate: fluffy scrambled egg whites with a hearty vegetable hash and seasoned breakfast potatoes, plus a sprinkle of cheddar for extra protein and flavor.",
+          "Entrees": [
+            {
+              "id": 65411,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 65407,
+              "entree": "Mushroom, Spinach & Tomato Vegetable Hash"
+            },
+            {
+              "id": 65397,
+              "entree": "Breakfast Potatoes w/ Peppers & Onions"
+            },
+            {
+              "id": 65417,
+              "entree": "Shredded Cheddar Cheese"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Salad Bar Muscle-Build Salad",
+          "Description": "Protein-packed salad with tofu, edamame, black beans, garbanzos, eggs, and cheddar over romaine and kale, finished with balsamic dressing for a balanced vegetarian meal.",
+          "Entrees": [
+            {
+              "id": 65213,
+              "entree": "Chopped Romaine"
+            },
+            {
+              "id": 65209,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65293,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65195,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65288,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65322,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65317,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 65289,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65189,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Roma Vegan Protein Rice Bowl",
+          "Description": "Hearty brown rice bowl topped with black beans, edamame, chopped kale, and roasted corn, plus creamy guacamole for healthy fats—great post-workout fuel.",
+          "Entrees": [
+            {
+              "id": 65638,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65634,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65648,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65640,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65674,
+              "entree": "Roasted Corn"
+            },
+            {
+              "id": 65656,
+              "entree": "Guacamole"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Mongolian Grill Tofu Lo Mein",
+          "Description": "Custom stir-fry with tofu and edamame over lo mein, loaded with broccoli and bean sprouts, garlic-forward and coated in General Tso's Sauce for a savory high-protein vegetarian dish.",
+          "Entrees": [
+            {
+              "id": 65864,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65826,
+              "entree": "Cooked Lo Mein"
+            },
+            {
+              "id": 65812,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65810,
+              "entree": "Bean Sprouts"
+            },
+            {
+              "id": 65830,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65818,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 65832,
+              "entree": "General Tso's Sauce"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Chef's Table Power Tofu Bowl",
+          "Description": "Brown rice base topped with crispy salt and pepper tofu, edamame, avocado, and green onions, finished with a kick of sriracha—protein-dense and ideal for muscle gain.",
+          "Entrees": [
+            {
+              "id": 65243,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65258,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65247,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65242,
+              "entree": "Avocado Sliced"
+            },
+            {
+              "id": 65250,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65261,
+              "entree": "Sriracha Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Protein Salad",
+          "Description": "Mixed greens and kale loaded with garbanzos, hard-boiled eggs, feta, roasted corn, and chili-garlic broccoli, dressed with lemon mint vinaigrette for a zesty, protein-rich salad.",
+          "Entrees": [
+            {
+              "id": 65364,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65279,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65358,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65354,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65356,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 65368,
+              "entree": "Roasted Corn"
+            },
+            {
+              "id": 65369,
+              "entree": "Roasted Garlic Chili Broccoli"
+            },
+            {
+              "id": 65363,
+              "entree": "Lemon Mint Vinaigrette"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Pasta Marinara",
+          "Description": "High-protein rotini chickpea pasta tossed in mushroom-spinach marinara with a side of sweet chili ginger broccoli for added fiber and micronutrients.",
+          "Entrees": [
+            {
+              "id": 65488,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 65484,
+              "entree": "Mushroom Spinach Marinara (purple)"
+            },
+            {
+              "id": 65490,
+              "entree": "Sweet Chili Ginger Broccoli"
+            }
+          ]
+        }
+      ]
+    },
+    "Dinner": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Woks Teriyaki Tofu Veggie Stir-Fry Bowl",
+          "Description": "Build-muscle vegetarian stir-fry: tofu seared with mushrooms, broccoli, spinach, and edamame over brown rice, finished with teriyaki and a touch of garlic chili sauce plus green onions for brightness. High in plant protein and complex carbs for training recovery.",
+          "Entrees": [
+            {
+              "id": 66379,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66352,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66351,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66361,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66373,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66375,
+              "entree": "Spinach"
+            },
+            {
+              "id": 66380,
+              "entree": "Teriyaki Sauce"
+            },
+            {
+              "id": 66364,
+              "entree": "Garlic Chili Sauce"
+            },
+            {
+              "id": 66358,
+              "entree": "Chopped Green Onions"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Power Protein Salad",
+          "Description": "Hearty vegetarian salad designed for muscle building: kale and mixed greens packed with garbanzo beans, black beans, edamame, and hard‑boiled eggs, topped with feta and black olives; dressed simply with olive oil and red wine vinegar.",
+          "Entrees": [
+            {
+              "id": 66125,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66198,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 66195,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66112,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66189,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66190,
+              "entree": "Eggs"
+            },
+            {
+              "id": 66192,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 66199,
+              "entree": "Olive Oil"
+            },
+            {
+              "id": 66211,
+              "entree": "Red Wine Vinegar"
+            },
+            {
+              "id": 66216,
+              "entree": "Sliced Black Olives"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Loaded Cheese Quesadilla Plate",
+          "Description": "Comforting vegetarian plate for calories and protein: a cheese quesadilla served with zesty salsa, sliced jalapeños, cooling sour cream, and a chili‑lime corn and hominy side with cotija.",
+          "Entrees": [
+            {
+              "id": 65968,
+              "entree": "Cheese Quesadilla"
+            },
+            {
+              "id": 65974,
+              "entree": "Salsa"
+            },
+            {
+              "id": 65976,
+              "entree": "Sliced Jalapeno Peppers"
+            },
+            {
+              "id": 65978,
+              "entree": "Sour Cream"
+            },
+            {
+              "id": 65972,
+              "entree": "Chili Lime Corn and Hominy Salad with Cotija Cheese"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Pasta Station Tofu-Edamame Marinara",
+          "Description": "High‑protein vegetarian pasta: whole‑wheat pasta tossed in roasted garlic basil marinara with tofu and edamame for complete plant protein, plus broccoli, mushrooms, and spinach for micronutrients and fiber.",
+          "Entrees": [
+            {
+              "id": 66028,
+              "entree": "Whole Wheat Pasta (Cooked)"
+            },
+            {
+              "id": 66026,
+              "entree": "Tofu"
+            },
+            {
+              "id": 66004,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66012,
+              "entree": "Roasted Garlic Basil Marinara Sauce"
+            },
+            {
+              "id": 65998,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66018,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66024,
+              "entree": "Spinach"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Roma Vegan Protein Grain Bowl",
+          "Description": "Muscle‑friendly vegan bowl: brown rice base loaded with black beans, garbanzo beans, edamame, and maple roasted sweet potatoes; rounded out with garlic roasted green beans and a scoop of guacamole for healthy fats.",
+          "Entrees": [
+            {
+              "id": 66397,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66395,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66403,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66402,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66408,
+              "entree": "Maple Roasted Sweet Potatoes"
+            },
+            {
+              "id": 66404,
+              "entree": "Garlic Roasted Green Beans"
+            },
+            {
+              "id": 66406,
+              "entree": "Guacamole"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Vegetarian Muscle Salad",
+          "Description": "Protein‑packed salad built for gains: chopped kale and romaine mixed with garbanzos, black beans, edamame, hard‑boiled eggs, cheddar, and pumpkin seeds; finished with olive oil and red wine vinegar.",
+          "Entrees": [
+            {
+              "id": 66048,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66050,
+              "entree": "Chopped Romaine"
+            },
+            {
+              "id": 66136,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66041,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66126,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66128,
+              "entree": "Eggs"
+            },
+            {
+              "id": 66162,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 66147,
+              "entree": "Olive Oil"
+            },
+            {
+              "id": 66159,
+              "entree": "Red Wine Vinegar"
+            },
+            {
+              "id": 66154,
+              "entree": "Pumpkin Seeds"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Chef's Table Tofu Power Bowl",
+          "Description": "Plant‑protein bowl to support muscle growth: brown rice topped with crispy salt‑and‑pepper tofu, edamame, cucumber, seaweed, avocado, and green onions; finished with sriracha for heat.",
+          "Entrees": [
+            {
+              "id": 65669,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65696,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65677,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65675,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65699,
+              "entree": "Seaweed"
+            },
+            {
+              "id": 65667,
+              "entree": "Avocado Sliced"
+            },
+            {
+              "id": 65683,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65705,
+              "entree": "Sriracha Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Pasta Marinara",
+          "Description": "High‑fiber, high‑protein chickpea pasta tossed with a mushroom‑spinach marinara and paired with roasted yellow squash, peas, cabbage, carrots, and spiced sweet potatoes for sustained energy.",
+          "Entrees": [
+            {
+              "id": 66019,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 66015,
+              "entree": "Mushroom Spinach Marinara (purple)"
+            },
+            {
+              "id": 66017,
+              "entree": "Roasted Yellow Squash and Peas"
+            },
+            {
+              "id": 66021,
+              "entree": "Sauteed Cabbage & Carrots"
+            },
+            {
+              "id": 66023,
+              "entree": "Spicy Citrus Roasted Sweet Potaotes"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Muscle Salad",
+          "Description": "Satiating salad for strength: mixed greens layered with garbanzo beans, hard‑boiled eggs, feta, roasted garlic chili broccoli, shredded carrots, flax seeds, and a bright lemon‑mint vinaigrette.",
+          "Entrees": [
+            {
+              "id": 65835,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65823,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65815,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65819,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 65845,
+              "entree": "Roasted Garlic Chili Broccoli"
+            },
+            {
+              "id": 65847,
+              "entree": "Shredded Carrots"
+            },
+            {
+              "id": 65821,
+              "entree": "Flax Seeds"
+            },
+            {
+              "id": 65833,
+              "entree": "Lemon Mint Vinaigrette"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "aagarw2422": {
+    "Breakfast": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Veggie Cheddar Omelet Plate",
+          "Description": "Custom omelet-style breakfast that’s vegetarian and protein-focused: liquid eggs cooked with spinach and mushrooms, topped with shredded cheddar. Great post-workout combo pairing high-quality egg protein with micronutrient-rich veggies.",
+          "Entrees": [
+            {
+              "id": 64984,
+              "entree": "Liquid Eggs (Omelet Station)"
+            },
+            {
+              "id": 64999,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65001,
+              "entree": "Spinach"
+            },
+            {
+              "id": 64997,
+              "entree": "Shredded Cheddar Cheese"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Sprouts Vegan Protein Breakfast",
+          "Description": "A plant-powered breakfast featuring vegan cheddar spinach scrambled ‘eggs,’ vegan breakfast sausage, and a gluten-free vegan pancake for balanced carbs and protein to support muscle building on a vegetarian diet.",
+          "Entrees": [
+            {
+              "id": 65031,
+              "entree": "Vegan Cheddar Spinach Scrambled Eggs"
+            },
+            {
+              "id": 65028,
+              "entree": "Vegan Breakfast Sausage"
+            },
+            {
+              "id": 65034,
+              "entree": "Vegan Pancake Gluten Free"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Greek Yogurt Parfait with Blueberries & Granola",
+          "Description": "Creamy Greek yogurt layered with fresh blueberries and crunchy granola. Provides high-quality dairy protein plus carbs and antioxidants—ideal as a light breakfast or recovery snack.",
+          "Entrees": [
+            {
+              "id": 65155,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65106,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 65094,
+              "entree": "Cereal Granola"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Chef’s Egg Duo (Whole Eggs + Egg Whites)",
+          "Description": "Mix of whole eggs with pepper jack for flavor and egg whites for lean protein—an excellent vegetarian, muscle-building plate.",
+          "Entrees": [
+            {
+              "id": 64906,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 64908,
+              "entree": "Scrambled Eggs Tomato Pepper Jack Cheese"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Grill Works Vegan Power Breakfast",
+          "Description": "Hearty vegan combo of breakfast sausage and chocolate chip pancake for satisfying protein and carbs to fuel training and recovery.",
+          "Entrees": [
+            {
+              "id": 64895,
+              "entree": "Vegan Breakfast Sausage"
+            },
+            {
+              "id": 64896,
+              "entree": "Vegan Chocolate Chip Pancake (purple)"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Yogurt Parfait",
+          "Description": "Plain yogurt topped with fresh blueberries and granola for a protein-plus-carb breakfast that’s easy on the stomach before or after a workout.",
+          "Entrees": [
+            {
+              "id": 64953,
+              "entree": "Yogurt Plain"
+            },
+            {
+              "id": 64931,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 64921,
+              "entree": "Cereal Granola"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Eggs & Hash Brown Power Plate",
+          "Description": "Classic vegetarian, high-protein breakfast combining scrambled eggs and a hard-boiled egg with crispy hash brown rounds for extra carbs.",
+          "Entrees": [
+            {
+              "id": 64936,
+              "entree": "Scrambled Eggs"
+            },
+            {
+              "id": 64924,
+              "entree": "Hard Boiled Egg (Breakfast)"
+            },
+            {
+              "id": 64926,
+              "entree": "Hash Browns Rounds"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Greek Yogurt Bowl",
+          "Description": "Vanilla Greek yogurt with fresh blueberries and granola—balanced protein and carbs for muscle repair and steady energy.",
+          "Entrees": [
+            {
+              "id": 65084,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65051,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 65036,
+              "entree": "Cereal Granola"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Vegan Sausage & Pancake Stack",
+          "Description": "Vegan breakfast sausage served with a chocolate chip pancake and soy-free vegan yogurt for a plant-forward, protein-conscious breakfast.",
+          "Entrees": [
+            {
+              "id": 65099,
+              "entree": "Vegan Breakfast Sausage"
+            },
+            {
+              "id": 65102,
+              "entree": "Vegan Chocolate Chip Pancake (purple)"
+            },
+            {
+              "id": 65114,
+              "entree": "Vegan Vanilla Soy-Free Yogurt"
+            }
+          ]
+        }
+      ]
+    },
+    "Lunch": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Woks Tofu Veggie Brown Rice Bowl",
+          "Description": "A muscle-friendly vegetarian stir-fry bowl built for training days: protein-rich tofu and edamame over hearty brown rice with broccoli, bok choy, and green beans, finished with garlic chili sauce for heat.",
+          "Entrees": [
+            {
+              "id": 65961,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65898,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65895,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65892,
+              "entree": "Bok Choy"
+            },
+            {
+              "id": 65923,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65933,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 65929,
+              "entree": "Garlic Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Protein Power Salad",
+          "Description": "High-protein vegetarian salad designed to support muscle growth: mixed greens and kale loaded with tofu, eggs, black beans, garbanzos, and edamame, topped with cheddar and balsamic.",
+          "Entrees": [
+            {
+              "id": 65716,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65586,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65760,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65692,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65572,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65707,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65689,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65753,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 65566,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Breakfast Sides Veggie Egg White Scramble Plate",
+          "Description": "Lean, high-protein egg white scramble with a vegetable medley and a moderate carb boost from breakfast potatoes—ideal for a post-workout lunch.",
+          "Entrees": [
+            {
+              "id": 65411,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 65407,
+              "entree": "Mushroom, Spinach & Tomato Vegetable Hash"
+            },
+            {
+              "id": 65419,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65421,
+              "entree": "Spinach"
+            },
+            {
+              "id": 65399,
+              "entree": "Diced Onions"
+            },
+            {
+              "id": 65398,
+              "entree": "Diced Green Peppers"
+            },
+            {
+              "id": 65417,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 65397,
+              "entree": "Breakfast Potatoes w/ Peppers & Onions"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Mongolian Grill Tofu Lo Mein Power Bowl",
+          "Description": "Made-to-order vegetarian stir-fry with tofu for complete protein, lo mein noodles for training fuel, and a rainbow of vegetables, finished with teriyaki sauce.",
+          "Entrees": [
+            {
+              "id": 65864,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65826,
+              "entree": "Cooked Lo Mein"
+            },
+            {
+              "id": 65812,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65810,
+              "entree": "Bean Sprouts"
+            },
+            {
+              "id": 65844,
+              "entree": "Shredded Cabbage"
+            },
+            {
+              "id": 65846,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65849,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 65830,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65867,
+              "entree": "Teriyaki Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Pasta with Mushroom Wine Sauce",
+          "Description": "High-fiber, high-protein chickpea pasta tossed with savory mushroom wine sauce, spinach, and mushrooms, finished with vegan parmesan—great for muscle recovery.",
+          "Entrees": [
+            {
+              "id": 65511,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 65510,
+              "entree": "Mushroom Wine Sauce"
+            },
+            {
+              "id": 65524,
+              "entree": "Spinach"
+            },
+            {
+              "id": 65516,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65608,
+              "entree": "Vegan Parmesan Cheese (purple)"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar High-Protein Vegetarian Plate",
+          "Description": "Build-muscle salad plate: romaine and kale topped with tofu, eggs, black beans, cottage cheese, mushrooms, and pumpkin seeds with balsamic dressing.",
+          "Entrees": [
+            {
+              "id": 65213,
+              "entree": "Chopped Romaine"
+            },
+            {
+              "id": 65209,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65322,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65289,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65195,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65283,
+              "entree": "Cottage Cheese"
+            },
+            {
+              "id": 65309,
+              "entree": "Pumpkin Seeds"
+            },
+            {
+              "id": 65189,
+              "entree": "Balsamic Dressing"
+            },
+            {
+              "id": 65319,
+              "entree": "Sliced Mushroom"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Chef's Table Power Tofu & Edamame Rice Bowl",
+          "Description": "Protein-forward vegetarian rice bowl featuring crispy tofu, edamame, avocado, and green onions over brown rice with a sriracha kick—balanced for strength training.",
+          "Entrees": [
+            {
+              "id": 65243,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65258,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65247,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65250,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65261,
+              "entree": "Sriracha Chili Sauce"
+            },
+            {
+              "id": 65242,
+              "entree": "Avocado Sliced"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Pasta Marinara with Veggies",
+          "Description": "Hearty chickpea pasta topped with mushroom–spinach marinara and a side of roasted broccoli and butternut squash—carb-protein balance for muscle gain.",
+          "Entrees": [
+            {
+              "id": 65488,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 65484,
+              "entree": "Mushroom Spinach Marinara (purple)"
+            },
+            {
+              "id": 65490,
+              "entree": "Sweet Chili Ginger Broccoli"
+            },
+            {
+              "id": 65486,
+              "entree": "Roasted Butternut Squash"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Protein Salad Bowl",
+          "Description": "Nutrient-dense salad with mixed greens and kale, garbanzos, eggs, feta, broccoli, and flax seeds, dressed in balsamic—high in protein and micronutrients.",
+          "Entrees": [
+            {
+              "id": 65364,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65279,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65358,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65354,
+              "entree": "Eggs"
+            },
+            {
+              "id": 65356,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 65369,
+              "entree": "Roasted Garlic Chili Broccoli"
+            },
+            {
+              "id": 65272,
+              "entree": "Balsamic Dressing"
+            },
+            {
+              "id": 65357,
+              "entree": "Flax Seeds"
+            }
+          ]
+        }
+      ]
+    },
+    "Dinner": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Woks Tofu Veggie Stir-Fry Bowl",
+          "Description": "Build-muscle stir-fry over brown rice with tofu and edamame for complete protein, plus a big mix of vegetables and aromatics, finished with a spicy garlic-chili sauce.",
+          "Entrees": [
+            {
+              "id": 66352,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66379,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66361,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66351,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66375,
+              "entree": "Spinach"
+            },
+            {
+              "id": 66366,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 66356,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 66357,
+              "entree": "Chopped Ginger"
+            },
+            {
+              "id": 66364,
+              "entree": "Garlic Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Protein Power Salad",
+          "Description": "Kale and mixed greens loaded with tofu, eggs, edamame, black beans, and garbanzos for high protein; feta for flavor, olives for healthy fats, and a simple olive oil–red wine vinegar dressing.",
+          "Entrees": [
+            {
+              "id": 66125,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66198,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 66220,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66190,
+              "entree": "Eggs"
+            },
+            {
+              "id": 66189,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66112,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66195,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66192,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 66137,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 66218,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 66199,
+              "entree": "Olive Oil"
+            },
+            {
+              "id": 66211,
+              "entree": "Red Wine Vinegar"
+            },
+            {
+              "id": 66216,
+              "entree": "Sliced Black Olives"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Woks Tofu Lo Mein Muscle Plate",
+          "Description": "Tofu and edamame tossed with lo mein, broccoli, bok choy, and scallions in a General Tso's glaze—carb-and-protein combo for post-workout recovery.",
+          "Entrees": [
+            {
+              "id": 66359,
+              "entree": "Cooked Lo Mein"
+            },
+            {
+              "id": 66379,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66361,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66351,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66350,
+              "entree": "Bok Choy"
+            },
+            {
+              "id": 66358,
+              "entree": "Chopped Green Onions"
+            },
+            {
+              "id": 66365,
+              "entree": "General Tso's Sauce"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Pasta Station Protein Marinara Bowl",
+          "Description": "Whole wheat pasta topped with roasted-garlic basil marinara, tofu and edamame for complete protein, and a colorful mix of broccoli, spinach, mushrooms, peppers, and carrots.",
+          "Entrees": [
+            {
+              "id": 66028,
+              "entree": "Whole Wheat Pasta (Cooked)"
+            },
+            {
+              "id": 66012,
+              "entree": "Roasted Garlic Basil Marinara Sauce"
+            },
+            {
+              "id": 66026,
+              "entree": "Tofu"
+            },
+            {
+              "id": 66004,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65998,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66024,
+              "entree": "Spinach"
+            },
+            {
+              "id": 66018,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66002,
+              "entree": "Diced Green Peppers"
+            },
+            {
+              "id": 66016,
+              "entree": "Shredded Carrots"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Salad Bar Mega Protein Bowl",
+          "Description": "Kale and romaine base piled high with black beans, chickpeas, edamame, eggs, cheddar, cucumber, red onion, and pumpkin seeds; finished with olive oil and red wine vinegar.",
+          "Entrees": [
+            {
+              "id": 66048,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66050,
+              "entree": "Chopped Romaine"
+            },
+            {
+              "id": 66041,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66136,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66126,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66128,
+              "entree": "Eggs"
+            },
+            {
+              "id": 66162,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 66122,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 66165,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 66154,
+              "entree": "Pumpkin Seeds"
+            },
+            {
+              "id": 66147,
+              "entree": "Olive Oil"
+            },
+            {
+              "id": 66159,
+              "entree": "Red Wine Vinegar"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Roma Vegan Hearty Bean & Grain Bowl",
+          "Description": "Brown rice topped with black and red beans, edamame, chopped kale, roasted corn, and maple-roasted sweet potatoes; finished with guacamole and pumpkin seeds for extra calories and healthy fats.",
+          "Entrees": [
+            {
+              "id": 66397,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66395,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66413,
+              "entree": "Red Beans"
+            },
+            {
+              "id": 66402,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66398,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66415,
+              "entree": "Roasted Corn"
+            },
+            {
+              "id": 66408,
+              "entree": "Maple Roasted Sweet Potatoes"
+            },
+            {
+              "id": 66406,
+              "entree": "Guacamole"
+            },
+            {
+              "id": 66411,
+              "entree": "Pumpkin Seeds"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Chef's Table Tofu Sushi Bowl",
+          "Description": "Brown rice base with crispy salt-and-pepper tofu, edamame, avocado, seaweed, scallions, and pickled ginger; seasoned with lite soy sauce and a sriracha kick.",
+          "Entrees": [
+            {
+              "id": 65669,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65696,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65677,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65667,
+              "entree": "Avocado Sliced"
+            },
+            {
+              "id": 65699,
+              "entree": "Seaweed"
+            },
+            {
+              "id": 65683,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65693,
+              "entree": "Pickled Ginger"
+            },
+            {
+              "id": 65690,
+              "entree": "Lite Soy Sauce"
+            },
+            {
+              "id": 65705,
+              "entree": "Sriracha Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Rotini Marinara Bowl",
+          "Description": "Protein-rich chickpea pasta tossed in mushroom–spinach marinara with sides of roasted vegetables and citrus-roasted sweet potatoes for carbs and micronutrients.",
+          "Entrees": [
+            {
+              "id": 66019,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 66015,
+              "entree": "Mushroom Spinach Marinara (purple)"
+            },
+            {
+              "id": 66017,
+              "entree": "Roasted Yellow Squash and Peas"
+            },
+            {
+              "id": 66021,
+              "entree": "Sauteed Cabbage & Carrots"
+            },
+            {
+              "id": 66023,
+              "entree": "Spicy Citrus Roasted Sweet Potaotes"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Vegan Quesadilla Power Plate",
+          "Description": "Vegan buffalo ‘chicken’ black bean quesadilla paired with tomato–black bean brown rice (and extra brown rice) to fuel training and recovery.",
+          "Entrees": [
+            {
+              "id": 65884,
+              "entree": "Vegan Buffalo Chicken Black Bean Quesadilla"
+            },
+            {
+              "id": 65881,
+              "entree": "Tomato Black Bean Brown Rice"
+            },
+            {
+              "id": 65878,
+              "entree": "Brown Rice"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "aagarw24": {
+    "Breakfast": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Veggie Omelet Builder",
+          "Description": "High-protein vegetarian omelet built at the omelet station with mushrooms, spinach, onions, and green peppers; add a light sprinkle of cheddar. Great post-workout option that’s filling without excess calories.",
+          "Entrees": [
+            {
+              "id": 64984,
+              "entree": "Liquid Eggs (Omelet Station)"
+            },
+            {
+              "id": 64999,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 65001,
+              "entree": "Spinach"
+            },
+            {
+              "id": 64976,
+              "entree": "Diced Onions"
+            },
+            {
+              "id": 64974,
+              "entree": "Diced Green Peppers"
+            },
+            {
+              "id": 64997,
+              "entree": "Shredded Cheddar Cheese"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Greek Yogurt Parfait with Berries",
+          "Description": "Creamy Greek yogurt topped with fresh blueberries and strawberries for a protein-rich, lower-calorie breakfast that supports weight loss and recovery.",
+          "Entrees": [
+            {
+              "id": 65155,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65106,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 65109,
+              "entree": "Fresh Strawberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Oatmeal and Fruit Bowl",
+          "Description": "Warm oatmeal topped with sliced apples and blueberries. Fiber-rich and satisfying to keep you full between classes while keeping calories in check.",
+          "Entrees": [
+            {
+              "id": 65127,
+              "entree": "Oatmeal"
+            },
+            {
+              "id": 65145,
+              "entree": "Sliced Apples"
+            },
+            {
+              "id": 65106,
+              "entree": "Fresh Blueberry"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Protein Egg Plate",
+          "Description": "Simple, protein-forward plate of egg whites with a fried egg for added satisfaction—great for fueling morning workouts while keeping calories moderate.",
+          "Entrees": [
+            {
+              "id": 64906,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 64904,
+              "entree": "Over Hard Fried Eggs"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Plain Yogurt Parfait with Berries",
+          "Description": "Plain yogurt layered with fresh blueberries and strawberries. A balanced, lighter option with protein and antioxidants for recovery.",
+          "Entrees": [
+            {
+              "id": 64953,
+              "entree": "Yogurt Plain"
+            },
+            {
+              "id": 64931,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 64933,
+              "entree": "Fresh Strawberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Hearty Oatmeal and Fruit",
+          "Description": "Oatmeal topped with grapes and cantaloupe for a high-fiber, hydrating breakfast that supports steady energy and weight loss.",
+          "Entrees": [
+            {
+              "id": 64943,
+              "entree": "Oatmeal"
+            },
+            {
+              "id": 64937,
+              "entree": "Grapes"
+            },
+            {
+              "id": 64920,
+              "entree": "Cantaloupe"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Greek Yogurt Parfait with Berries",
+          "Description": "Vanilla Greek yogurt with fresh blueberries and strawberries—high in protein, low in added sugar to support a calorie deficit.",
+          "Entrees": [
+            {
+              "id": 65084,
+              "entree": "Vanilla Greek Yogurt"
+            },
+            {
+              "id": 65051,
+              "entree": "Fresh Blueberry"
+            },
+            {
+              "id": 65054,
+              "entree": "Fresh Strawberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Oatmeal Power Bowl",
+          "Description": "Oatmeal topped with banana and blueberries for a fiber-rich, satisfying breakfast that helps control hunger between meals.",
+          "Entrees": [
+            {
+              "id": 65066,
+              "entree": "Oatmeal"
+            },
+            {
+              "id": 65024,
+              "entree": "Banana"
+            },
+            {
+              "id": 65051,
+              "entree": "Fresh Blueberry"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Protein Egg Duo",
+          "Description": "Classic egg-based plate to maximize protein while keeping carbs light—ideal for cutting while staying energized.",
+          "Entrees": [
+            {
+              "id": 64936,
+              "entree": "Scrambled Eggs"
+            },
+            {
+              "id": 64924,
+              "entree": "Hard Boiled Egg (Breakfast)"
+            }
+          ]
+        }
+      ]
+    },
+    "Lunch": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Woks Tofu Veggie Brown Rice Bowl",
+          "Description": "A high-fiber, plant-protein stir-fry bowl built to keep you full with fewer calories: tofu seared with broccoli, bok choy, and green beans over brown rice. Ask for garlic chili sauce lightly and add chopped garlic/ginger and green onions for big flavor without extra calories or sugar.",
+          "Entrees": [
+            {
+              "id": 65961,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65898,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65895,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65892,
+              "entree": "Bok Choy"
+            },
+            {
+              "id": 65933,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 65929,
+              "entree": "Garlic Chili Sauce"
+            },
+            {
+              "id": 65916,
+              "entree": "Chopped Green Onions"
+            },
+            {
+              "id": 65910,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 65913,
+              "entree": "Chopped Ginger"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Kale-Bean Protein Salad (Salad Bar)",
+          "Description": "Volume-heavy, protein-forward salad: chopped kale and mixed greens topped with black beans, garbanzo beans, edamame, cucumbers, and tomatoes. Dress lightly with balsamic to keep calories in check while maximizing fiber and plant protein for recovery days.",
+          "Entrees": [
+            {
+              "id": 65586,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65716,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65572,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65707,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65689,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65597,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65763,
+              "entree": "Tomatoes Diced"
+            },
+            {
+              "id": 65566,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Egg-White Veggie Hash Plate",
+          "Description": "An ovo-vegetarian, lean-protein meal: fluffy scrambled egg whites over a mushroom–spinach–tomato veggie hash with a light sprinkle of cheddar for flavor. Great on workout days when you want protein with minimal fat.",
+          "Entrees": [
+            {
+              "id": 65411,
+              "entree": "Scrambled Egg Whites"
+            },
+            {
+              "id": 65407,
+              "entree": "Mushroom, Spinach & Tomato Vegetable Hash"
+            },
+            {
+              "id": 65417,
+              "entree": "Shredded Cheddar Cheese"
+            },
+            {
+              "id": 65421,
+              "entree": "Spinach"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Marinara Pasta Lite",
+          "Description": "Simple and satisfying: semolina pasta tossed in roasted garlic basil marinara. Keep portions moderate and pair with a side of veggies from the same station if available to boost fiber without many added calories.",
+          "Entrees": [
+            {
+              "id": 65562,
+              "entree": "Semolina Pasta Cooked"
+            },
+            {
+              "id": 65561,
+              "entree": "Roasted Garlic Basil Marinara Sauce"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "BBQ Mushroom & Black Bean Street Tacos",
+          "Description": "Flavorful vegetarian tacos on 6\" tortillas: BBQ mushroom–black bean filling topped with pico, cilantro, lime, and jalapeño. Add a small sprinkle of cotija and a touch of guacamole for healthy fats while keeping overall calories in check.",
+          "Entrees": [
+            {
+              "id": 65441,
+              "entree": "BBQ Mushroom and Black Bean Taco"
+            },
+            {
+              "id": 65440,
+              "entree": "6\" Flour Tortilla"
+            },
+            {
+              "id": 65448,
+              "entree": "Pico de Gallo"
+            },
+            {
+              "id": 65443,
+              "entree": "CIlantro"
+            },
+            {
+              "id": 65446,
+              "entree": "Limes"
+            },
+            {
+              "id": 65449,
+              "entree": "Sliced Jalapeno Peppers"
+            },
+            {
+              "id": 65445,
+              "entree": "Guacamole"
+            },
+            {
+              "id": 65444,
+              "entree": "Cotija Cheese"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Roma Vegan Brown Rice–Kale Power Bowl",
+          "Description": "A nutrient-dense bowl built for weight management and training: brown rice with chopped kale, edamame, roasted green beans, and roasted corn. Finish with a light drizzle of balsamic for brightness without extra calories.",
+          "Entrees": [
+            {
+              "id": 65638,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65640,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65648,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65652,
+              "entree": "Garlic Roasted Green Beans"
+            },
+            {
+              "id": 65674,
+              "entree": "Roasted Corn"
+            },
+            {
+              "id": 65628,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "High-Protein Salad Bar Build (Tofu & Edamame)",
+          "Description": "A big crunchy salad designed for fullness: kale and lettuce topped with tofu, edamame, black beans, cucumber, red onion, and carrots. Use a light vinaigrette to keep calories low while maintaining protein and fiber.",
+          "Entrees": [
+            {
+              "id": 65209,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65211,
+              "entree": "Chopped Lettuce"
+            },
+            {
+              "id": 65322,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65288,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65195,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 65286,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65320,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 65316,
+              "entree": "Shredded Carrots"
+            },
+            {
+              "id": 65312,
+              "entree": "Raspberry Vinaigrette Lite"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Lean Tofu Veggie Stir-Fry (Mongolian Grill)",
+          "Description": "Custom stir-fry focused on veggies and lean plant protein: tofu with broccoli, spinach, cabbage, snap peas, and green pepper. Season with garlic, ginger, and green onions; ask for General Tso’s sauce very lightly to limit sugar and calories.",
+          "Entrees": [
+            {
+              "id": 65864,
+              "entree": "TOFU"
+            },
+            {
+              "id": 65812,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 65852,
+              "entree": "Spinach"
+            },
+            {
+              "id": 65844,
+              "entree": "Shredded Cabbage"
+            },
+            {
+              "id": 65858,
+              "entree": "Sugar Snap Peas"
+            },
+            {
+              "id": 65828,
+              "entree": "Diced Green Pepper"
+            },
+            {
+              "id": 65818,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 65820,
+              "entree": "Chopped Ginger"
+            },
+            {
+              "id": 65822,
+              "entree": "Chopped Green Onions"
+            },
+            {
+              "id": 65832,
+              "entree": "General Tso's Sauce"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Chef’s Table Tofu-Edamame Power Bowl",
+          "Description": "A satiating, macro-friendly bowl: brown rice topped with crispy salt-and-pepper tofu, edamame, cucumber, seaweed, avocado, and green onions. Finish with a light splash of lite soy and sriracha for flavor without excess calories.",
+          "Entrees": [
+            {
+              "id": 65243,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65258,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65247,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65246,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65259,
+              "entree": "Seaweed"
+            },
+            {
+              "id": 65242,
+              "entree": "Avocado Sliced"
+            },
+            {
+              "id": 65250,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65256,
+              "entree": "Lite Soy Sauce"
+            },
+            {
+              "id": 65261,
+              "entree": "Sriracha Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Purple Zone Chickpea Pasta Marinara with Broccoli",
+          "Description": "High-protein pasta made from chickpeas, tossed in a mushroom–spinach marinara and served with a side of sweet chili ginger broccoli. A balanced option that’s higher in protein and fiber than regular pasta.",
+          "Entrees": [
+            {
+              "id": 65488,
+              "entree": "Rotini Chickpea Pasta"
+            },
+            {
+              "id": 65484,
+              "entree": "Mushroom Spinach Marinara (purple)"
+            },
+            {
+              "id": 65490,
+              "entree": "Sweet Chili Ginger Broccoli"
+            },
+            {
+              "id": 65486,
+              "entree": "Roasted Butternut Squash"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Ciao Herb Quinoa & Roasted Veggie Plate",
+          "Description": "Light, fiber-rich plate: herb quinoa with roasted broccoli and tomatoes, roasted cauliflower and zucchini, roasted carrots, and peas with caramelized red onions. Great for weight loss due to volume and fiber.",
+          "Entrees": [
+            {
+              "id": 65226,
+              "entree": "Herb Quinoa"
+            },
+            {
+              "id": 65229,
+              "entree": "Roasted Broccoli and Tomatoes"
+            },
+            {
+              "id": 65231,
+              "entree": "Roasted Cauliflower and Zucchini"
+            },
+            {
+              "id": 65230,
+              "entree": "Roasted Carrots"
+            },
+            {
+              "id": 65228,
+              "entree": "Peas and Caramelized Red Onions"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Harvest Greens Big Fiber-Protein Salad",
+          "Description": "Mixed greens and chopped kale loaded with garbanzo beans, cucumbers, grape tomatoes, and roasted vegetables. Dress with lemon mint vinaigrette for bright flavor and minimal calories.",
+          "Entrees": [
+            {
+              "id": 65364,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65279,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65358,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65353,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65359,
+              "entree": "Grape Tomatoes"
+            },
+            {
+              "id": 65367,
+              "entree": "Roasted Cauliflower and Red Onions"
+            },
+            {
+              "id": 65369,
+              "entree": "Roasted Garlic Chili Broccoli"
+            },
+            {
+              "id": 65363,
+              "entree": "Lemon Mint Vinaigrette"
+            }
+          ]
+        }
+      ]
+    },
+    "Dinner": {
+      "Yahentamitisi_Dining_Hall": [
+        {
+          "Meal_Option": "Garlic Chili Tofu Veggie Brown Rice Bowl",
+          "Description": "A high-fiber, high-protein stir-fry style bowl built for fat loss: firm tofu and a variety of non-starchy veggies over brown rice with a light garlic-chili sauce. Emphasizes volume and lean plant protein to keep you full with moderate calories.",
+          "Entrees": [
+            {
+              "id": 66352,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66379,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66351,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66350,
+              "entree": "Bok Choy"
+            },
+            {
+              "id": 66366,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 66373,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66356,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 66358,
+              "entree": "Chopped Green Onions"
+            },
+            {
+              "id": 66364,
+              "entree": "Garlic Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Mediterranean Tofu & Chickpea Salad",
+          "Description": "A hearty salad packed with tofu and chickpeas for protein plus crunchy veggies and a light balsamic dressing—great post-workout fuel while keeping calories in check.",
+          "Entrees": [
+            {
+              "id": 66198,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 66125,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 66195,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 66220,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66137,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 66223,
+              "entree": "Tomatoes Diced"
+            },
+            {
+              "id": 66216,
+              "entree": "Sliced Black Olives"
+            },
+            {
+              "id": 66192,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 66109,
+              "entree": "Balsamic Dressing"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Caprese Salad Plate with Fruit",
+          "Description": "Refreshing, lighter option: tomato–fresh mozzarella salad paired with minty mixed fruit. Good for a lighter dinner or to pair with a soup if you need more volume.",
+          "Entrees": [
+            {
+              "id": 66345,
+              "entree": "Tomato Fresh Mozzarella Salad"
+            },
+            {
+              "id": 66343,
+              "entree": "Mixed Fruit with Mint"
+            }
+          ]
+        }
+      ],
+      "South_Campus_Dining_Hall": [
+        {
+          "Meal_Option": "Whole-Wheat Marinara Tofu Veggie Pasta",
+          "Description": "Higher-fiber pasta base with marinara, tofu, and a big mix of vegetables. A lean, energy-sustaining plate for training days—keep sauce moderate and load up the veggies for fullness.",
+          "Entrees": [
+            {
+              "id": 66028,
+              "entree": "Whole Wheat Pasta (Cooked)"
+            },
+            {
+              "id": 66012,
+              "entree": "Roasted Garlic Basil Marinara Sauce"
+            },
+            {
+              "id": 66026,
+              "entree": "Tofu"
+            },
+            {
+              "id": 65998,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66024,
+              "entree": "Spinach"
+            },
+            {
+              "id": 66018,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66002,
+              "entree": "Diced Green Peppers"
+            },
+            {
+              "id": 66016,
+              "entree": "Shredded Carrots"
+            },
+            {
+              "id": 66020,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 66027,
+              "entree": "Tomatoes Diced"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Mongolian Tofu Veggie Plate (no noodles)",
+          "Description": "A low-calorie, high-volume stir-fry: tofu with a variety of crunchy vegetables and aromatics. Ask for just a small amount of sauce to keep sugars and calories down.",
+          "Entrees": [
+            {
+              "id": 66481,
+              "entree": "TOFU"
+            },
+            {
+              "id": 66456,
+              "entree": "Baby Corn"
+            },
+            {
+              "id": 66458,
+              "entree": "Broccoli"
+            },
+            {
+              "id": 66457,
+              "entree": "Bean Sprouts"
+            },
+            {
+              "id": 66469,
+              "entree": "Green Beans"
+            },
+            {
+              "id": 66474,
+              "entree": "Shredded Cabbage"
+            },
+            {
+              "id": 66475,
+              "entree": "Sliced Mushroom"
+            },
+            {
+              "id": 66461,
+              "entree": "Chopped Garlic"
+            },
+            {
+              "id": 66462,
+              "entree": "Chopped Ginger"
+            },
+            {
+              "id": 66463,
+              "entree": "Chopped Green Onions"
+            },
+            {
+              "id": 66468,
+              "entree": "General Tso's Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Roma Vegan High-Protein Bean & Rice Bowl",
+          "Description": "A satiating vegan bowl with brown rice, two kinds of beans, edamame, and colorful veggies, finished with guacamole and pumpkin seeds. Great fiber and plant protein to support fat loss while training.",
+          "Entrees": [
+            {
+              "id": 66397,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 66395,
+              "entree": "Black Beans"
+            },
+            {
+              "id": 66413,
+              "entree": "Red Beans"
+            },
+            {
+              "id": 66402,
+              "entree": "Edamame"
+            },
+            {
+              "id": 66409,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 66422,
+              "entree": "Sliced Roma Tomatoes"
+            },
+            {
+              "id": 66400,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 66421,
+              "entree": "Sliced Red Onion"
+            },
+            {
+              "id": 66414,
+              "entree": "Red Pepper"
+            },
+            {
+              "id": 66406,
+              "entree": "Guacamole"
+            },
+            {
+              "id": 66411,
+              "entree": "Pumpkin Seeds"
+            }
+          ]
+        }
+      ],
+      "North_251_Dining_Hall": [
+        {
+          "Meal_Option": "Spicy Tofu Brown Rice Power Bowl",
+          "Description": "Protein-forward bowl with tofu, brown rice, and crunchy veggies, finished with sriracha. High fiber and protein for fullness with controlled calories—ideal for weight loss and workouts.",
+          "Entrees": [
+            {
+              "id": 65669,
+              "entree": "Brown Rice"
+            },
+            {
+              "id": 65696,
+              "entree": "Salt and Pepper Tofu"
+            },
+            {
+              "id": 65677,
+              "entree": "Edamame"
+            },
+            {
+              "id": 65671,
+              "entree": "Cabbage Mix"
+            },
+            {
+              "id": 65675,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65683,
+              "entree": "Green Onions"
+            },
+            {
+              "id": 65687,
+              "entree": "Kimchi"
+            },
+            {
+              "id": 65705,
+              "entree": "Sriracha Chili Sauce"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Kale + Mixed Greens Protein Salad with Feta",
+          "Description": "Large salad base with kale and mixed greens, chickpeas for protein and fiber, roasted broccoli for volume, and a light lemon-mint vinaigrette. Satisfying with moderate calories.",
+          "Entrees": [
+            {
+              "id": 65835,
+              "entree": "Mixed Greens"
+            },
+            {
+              "id": 65750,
+              "entree": "Chopped Kale"
+            },
+            {
+              "id": 65823,
+              "entree": "Garbanzo Beans"
+            },
+            {
+              "id": 65813,
+              "entree": "Cucumber"
+            },
+            {
+              "id": 65825,
+              "entree": "Grape Tomatoes"
+            },
+            {
+              "id": 65845,
+              "entree": "Roasted Garlic Chili Broccoli"
+            },
+            {
+              "id": 65819,
+              "entree": "Feta Cheese"
+            },
+            {
+              "id": 65833,
+              "entree": "Lemon Mint Vinaigrette"
+            }
+          ]
+        },
+        {
+          "Meal_Option": "Herb Quinoa & Roasted Veggie Plate",
+          "Description": "Light, nutrient-dense plate: herb quinoa topped with a mix of roasted vegetables. Great on lower-hunger days; pair with a soup if you need more volume.",
+          "Entrees": [
+            {
+              "id": 65635,
+              "entree": "Herb Quinoa"
+            },
+            {
+              "id": 65641,
+              "entree": "Roasted Broccoli and Tomatoes"
+            },
+            {
+              "id": 65645,
+              "entree": "Roasted Cauliflower and Zucchini"
+            },
+            {
+              "id": 65643,
+              "entree": "Roasted Carrots"
+            },
+            {
+              "id": 65639,
+              "entree": "Peas and Caramelized Red Onions"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -127,6 +127,8 @@ export default function Profile() {
     isNumeric?: boolean;
     unit?: string;
   }>({ visible: false, title: '', field: '', currentValue: null });
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
@@ -237,6 +239,54 @@ export default function Profile() {
     router.replace("/" as any);
   }
 
+  async function handleDeleteAccount() {
+    setIsDeleting(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setError("Not authenticated");
+        setIsDeleting(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/delete-account`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        // Sign out from Google if signed in
+        try {
+          const currentUser = await GoogleSignin.getCurrentUser();
+          if (currentUser) {
+            await GoogleSignin.signOut();
+          }
+        } catch (err) {
+          console.log("Google sign out error:", err);
+        }
+
+        // Clear local storage
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("supabase_session");
+        
+        // Navigate to landing page
+        router.replace("/" as any);
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to delete account");
+        setIsDeleting(false);
+        setDeleteConfirmVisible(false);
+      }
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      setError("Network error. Please try again.");
+      setIsDeleting(false);
+      setDeleteConfirmVisible(false);
+    }
+  }
+
   const openEditModal = (title: string, field: string, currentValue: string | number | null, options?: string[], isNumeric?: boolean, unit?: string) => {
     setEditModal({ visible: true, title, field, currentValue, options, isNumeric, unit });
   };
@@ -323,11 +373,25 @@ export default function Profile() {
         {/* Logout Button */}
         <TouchableOpacity
           onPress={handleLogout}
-          className="bg-red-50 border border-red-200 rounded-2xl py-4 items-center mb-8"
+          className="bg-red-50 border border-red-200 rounded-2xl py-4 items-center mb-4"
         >
           <View className="flex-row items-center">
             <Ionicons name="log-out-outline" size={24} color="#dc2626" />
             <Text className="text-red-600 text-lg font-semibold ml-2">Log Out</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Delete Account Button */}
+        <TouchableOpacity
+          onPress={() => setDeleteConfirmVisible(true)}
+          className="bg-red-600 rounded-2xl py-4 items-center mb-8"
+          disabled={isDeleting}
+        >
+          <View className="flex-row items-center">
+            <Ionicons name="trash-outline" size={24} color="#ffffff" />
+            <Text className="text-white text-lg font-semibold ml-2">
+              {isDeleting ? "Deleting..." : "Delete Account"}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -344,6 +408,44 @@ export default function Profile() {
         onClose={() => setEditModal({ ...editModal, visible: false })}
         onSave={updateField}
       />
+
+      {/* Delete Account Confirmation Modal */}
+      <Modal visible={deleteConfirmVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-2xl p-6 mx-6 w-11/12">
+            <Text className="text-2xl font-bold text-gray-900 mb-2">Delete Account</Text>
+            <Text className="text-base text-gray-600 mb-6">
+              Are you sure you want to delete your account? This action cannot be undone. All your data including meal plans, meal logs, and statistics will be permanently deleted.
+            </Text>
+            <View className="flex-row justify-end">
+              <TouchableOpacity
+                onPress={() => {
+                  setDeleteConfirmVisible(false);
+                  setError("");
+                }}
+                className="px-6 py-3 rounded-xl mr-3"
+                disabled={isDeleting}
+              >
+                <Text className="text-gray-600 text-lg font-semibold">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDeleteAccount}
+                className="bg-red-600 px-6 py-3 rounded-xl"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Text className="text-white text-lg font-semibold">Delete</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+            {error && (
+              <Text className="text-red-600 text-sm mt-4">{error}</Text>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

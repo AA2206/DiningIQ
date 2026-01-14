@@ -87,26 +87,41 @@ export default function MealPlan() {
     return diningHallMap[hall] || hall;
   }
 
+  // Helper function to get current hour and minute in EST
+  function getESTTime(): { hour: number; minute: number } {
+    const now = new Date();
+    // EST is UTC-5, EDT is UTC-4
+    // Use toLocaleString to get EST time
+    const estTimeString = now.toLocaleString('en-US', { 
+      timeZone: 'America/New_York', 
+      hour: 'numeric', 
+      minute: 'numeric',
+      hour12: false 
+    });
+    const [hour, minute] = estTimeString.split(':').map(Number);
+    return { hour, minute };
+  }
+
   // Helper function to calculate effective date
-  // - Before 4 AM: yesterday (can still edit/add previous day)
-  // - 4 AM to 5:59 AM: no access (returns null)
-  // - 6 AM or later: today (can edit/add current day)
+  // - Before 3 AM EST: yesterday (can still edit/add previous day)
+  // - 3 AM to 4:29 AM EST: no access (returns null)
+  // - 4:30 AM EST or later: today (can edit/add current day)
   function getEffectiveDate(): Date | null {
     const now = new Date();
-    const hour = now.getHours();
+    const { hour, minute } = getESTTime();
     
-    // 4 AM to 5:59 AM: no access
-    if (hour >= 4 && hour < 6) {
+    // 3 AM to 4:29 AM EST: no access
+    if (hour === 3 || (hour === 4 && minute < 30)) {
       return null;
     }
     
     const resultDate = new Date(now);
     
-    // Before 4 AM: use yesterday as effective date
-    if (hour < 4) {
+    // Before 3 AM EST: use yesterday as effective date
+    if (hour < 3) {
       resultDate.setDate(now.getDate() - 1);
     }
-    // 6 AM or later: use today as effective date (already set)
+    // 4:30 AM EST or later: use today as effective date (already set)
     
     resultDate.setHours(0, 0, 0, 0);
     return resultDate;
@@ -139,7 +154,7 @@ export default function MealPlan() {
       const targetDate = getEffectiveDate();
       
       if (!targetDate) {
-        Alert.alert("Error", "Cannot add meals during 4-6 AM window. Please try again after 6 AM.");
+        Alert.alert("Error", "Cannot add meals during 3-4:30 AM EST window. Please try again after 4:30 AM EST.");
         setAddingMealKey(null);
         return;
       }

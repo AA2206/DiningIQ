@@ -52,6 +52,7 @@ model User {
   diet              DietType?
   other             String?
   mealPlan          Json?
+  nextMealPlan      Json?
   mealPlanPopulated Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -98,6 +99,29 @@ model UMD_Dining {
   
   @@index([diningHall, meal])
 }
+
+model UMD_Dining2 {
+  id                    Int       @id @default(autoincrement())
+  entree                String
+  diningHall            String
+  meal                  MealType
+  dietaryInformation    String?
+  category              String
+  totalCalories         Int
+  totalFat              Int
+  totalCarbohydrate     Int
+  saturatedFat          Int
+  dietaryFiber          Int
+  transFat              Int
+  totalSugars           Int
+  cholesterol           Int
+  sodium                Int
+  protein               Int
+  
+  @@index([diningHall, meal])
+}
+
+
 
 model MealStats {
   id          Int       @id @default(autoincrement())

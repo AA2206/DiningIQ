@@ -1,5 +1,5 @@
 // app/account/mealLogging.tsx
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -93,26 +93,41 @@ export default function MealLogging() {
   // Dining Hall Options
   const DINING_HALLS = ["South Campus", "Yahentamitsi Dining Hall", "251 North"];
 
+  // Helper function to get current hour and minute in EST
+  function getESTTime(): { hour: number; minute: number } {
+    const now = new Date();
+    // EST is UTC-5, EDT is UTC-4
+    // Use toLocaleString to get EST time
+    const estTimeString = now.toLocaleString('en-US', { 
+      timeZone: 'America/New_York', 
+      hour: 'numeric', 
+      minute: 'numeric',
+      hour12: false 
+    });
+    const [hour, minute] = estTimeString.split(':').map(Number);
+    return { hour, minute };
+  }
+
   // Helper function to calculate effective date
-  // - Before 4 AM: yesterday (can still edit/add previous day)
-  // - 4 AM to 5:59 AM: no access (returns null)
-  // - 6 AM or later: today (can edit/add current day)
+  // - Before 3 AM EST: yesterday (can still edit/add previous day)
+  // - 3 AM to 4:29 AM EST: no access (returns null)
+  // - 4:30 AM EST or later: today (can edit/add current day)
   function getEffectiveDate(): Date | null {
     const now = new Date();
-    const hour = now.getHours();
+    const { hour, minute } = getESTTime();
     
-    // 4 AM to 5:59 AM: no access
-    if (hour >= 4 && hour < 6) {
+    // 3 AM to 4:29 AM EST: no access
+    if (hour === 3 || (hour === 4 && minute < 30)) {
       return null;
     }
     
     const effectiveDate = new Date(now);
     
-    // Before 4 AM: use yesterday as effective date
-    if (hour < 4) {
+    // Before 3 AM EST: use yesterday as effective date
+    if (hour < 3) {
       effectiveDate.setDate(now.getDate() - 1);
     }
-    // 6 AM or later: use today as effective date (already set)
+    // 4:30 AM EST or later: use today as effective date (already set)
     
     effectiveDate.setHours(0, 0, 0, 0);
     return effectiveDate;
@@ -122,7 +137,7 @@ export default function MealLogging() {
   function isDateAccessible(date: Date): boolean {
     const effectiveDate = getEffectiveDate();
     
-    // If no effective date (4-6 AM window), no dates are accessible
+    // If no effective date (3-4:30 AM EST window), no dates are accessible
     if (!effectiveDate) {
       return false;
     }
@@ -235,7 +250,7 @@ export default function MealLogging() {
     useCallback(() => {
       const effectiveDate = getEffectiveDate();
       
-      // If no effective date (4-6 AM window), use today for viewing but no add/edit access
+      // If no effective date (3-4:30 AM EST window), use today for viewing but no add/edit access
       const dateToUse = effectiveDate || new Date();
       dateToUse.setHours(0, 0, 0, 0);
       
@@ -479,7 +494,7 @@ export default function MealLogging() {
       // Determine target date: effective date if meal is from past, same date if from effective date
       const effectiveDate = getEffectiveDate();
       if (!effectiveDate) {
-        setCopyError("Cannot copy meals during 4-6 AM window. Please try again after 6 AM.");
+        setCopyError("Cannot copy meals during 3-4:30 AM EST window. Please try again after 4:30 AM EST.");
         setCopyingMeal(false);
         return;
       }
@@ -965,8 +980,7 @@ export default function MealLogging() {
         const effectiveDate = getEffectiveDate();
         
         if (!effectiveDate) {
-          console.error("Cannot add meal: not in accessible time window (4-6 AM)");
-          // TODO: Show error message to user
+          Alert.alert("Error", "Cannot add meals during 3-4:30 AM EST window. Please try again after 4:30 AM EST.");
           return;
         }
         
@@ -1529,7 +1543,7 @@ export default function MealLogging() {
                   {selectedCopyMealType 
                     ? (() => {
                         const effectiveDate = getEffectiveDate();
-                        if (!effectiveDate) return "Not Available (4-6 AM)";
+                        if (!effectiveDate) return "Not Available (3-4:30 AM EST)";
                         const mealDate = new Date(mealToCopy?.date || new Date());
                         mealDate.setHours(0, 0, 0, 0);
                         const isEffectiveDate = mealDate.getTime() === effectiveDate.getTime();
