@@ -27,6 +27,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
+    "openai": "^6.16.0",
     "prisma": "^6.19.0",
     "zod": "^4.1.12"
   },
