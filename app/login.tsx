@@ -1,8 +1,10 @@
 // app/login.tsx
 import { useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import AuthForm, { AuthFormRef } from '../components/AuthForm';
 
 // Configure Google Sign-In
@@ -14,6 +16,7 @@ export default function Login() {
   const router = useRouter();
   const errorRef = useRef<AuthFormRef>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
 
   const handleSubmit = async (username: string, password: string) => {
     try {
@@ -114,13 +117,89 @@ export default function Login() {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    try {
+      setIsAppleLoading(true);
+      
+      // Check if Apple Sign-In is available (iOS 13+)
+      if (!AppleAuthentication.isAvailableAsync()) {
+        errorRef.current?.setError('Apple Sign-In is not available on this device');
+        return;
+      }
+
+      // Perform Apple Sign-In
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      console.log('Apple Sign-In Result:', JSON.stringify(credential, null, 2));
+
+      // Apple may not provide email on subsequent sign-ins
+      // Use user identifier as fallback
+      const email = credential.email || `${credential.user}@privaterelay.appleid.com`;
+      const name = credential.fullName 
+        ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
+        : null;
+
+      // Send Apple user info to backend
+      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+      
+      const response = await fetch(`${API_BASE_URL}/apple-auth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          name: name,
+          appleId: credential.user, // Unique Apple user identifier
+          identityToken: credential.identityToken, // Optional: for verification
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        errorRef.current?.setError(data.error || 'Apple sign-in failed');
+        return;
+      }
+
+      // Store backend JWT token
+      if (data.token) {
+        await AsyncStorage.setItem('token', data.token);
+      }
+
+      // Navigate based on whether user is new or returning
+      if (data.isNewUser) {
+        router.push("/onboarding/gender");
+      } else {
+        router.replace("/account" as any);
+      }
+    } catch (error: any) {
+      console.log('Apple Sign-In Error:', error);
+      
+      if (error.code === 'ERR_CANCELED') {
+        // User cancelled - no error message needed
+      } else {
+        errorRef.current?.setError(error.message || 'Apple sign-in failed. Please try again.');
+      }
+    } finally {
+      setIsAppleLoading(false);
+    }
+  };
+
   return (
     <AuthForm
       ref={errorRef}
       title="Login"
       handleSubmit={handleSubmit}
       onGoogleSignIn={handleGoogleSignIn}
+      onAppleSignIn={Platform.OS === 'ios' ? handleAppleSignIn : undefined}
       isGoogleLoading={isGoogleLoading}
+      isAppleLoading={isAppleLoading}
     />
   );
 }

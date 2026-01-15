@@ -455,6 +455,58 @@ app.post('/google-auth', async (req: Request, res: Response) => {
   }
 });
 
+// POST /apple-auth - Handle Apple Sign-In
+app.post('/apple-auth', async (req: Request, res: Response) => {
+  const { email, appleId, name } = req.body;
+
+  if (!email && !appleId) {
+    return res.status(400).json({ error: 'Email or Apple ID is required' });
+  }
+
+  try {
+    // Use email if provided, otherwise use Apple ID as username
+    const username = email || `apple_${appleId}`;
+    
+    // Check if user exists
+    let user = await prisma.user.findUnique({
+      where: { username: username }
+    });
+
+    let isNewUser = false;
+
+    if (!user) {
+      // Create new user for Apple sign-in
+      // Generate a random secure password (user won't need it - they'll always use Apple)
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await prisma.user.create({
+        data: {
+          username: username,
+          passcode: hashedPassword,
+        }
+      });
+      isNewUser = true;
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { username: user.username, id: user.id },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json({ 
+      token, 
+      userId: user.id,
+      isNewUser,  // Frontend can use this to redirect to onboarding
+    });
+  } catch (err) {
+    console.error('Apple auth error:', err);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // ========== USER INFO ROUTES ==========
 
 // JWT Authentication Middleware
