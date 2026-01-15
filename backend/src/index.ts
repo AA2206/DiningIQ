@@ -457,7 +457,7 @@ app.post('/google-auth', async (req: Request, res: Response) => {
 
 // POST /apple-auth - Handle Apple Sign-In
 app.post('/apple-auth', async (req: Request, res: Response) => {
-  const { email, appleId, name } = req.body;
+  const { email, appleId } = req.body;
 
   if (!email && !appleId) {
     return res.status(400).json({ error: 'Email or Apple ID is required' });
