@@ -1,7 +1,5 @@
 // Backend entry point
 import { google } from '@ai-sdk/google';
-import OpenAI from "openai"; 
-
 import { PrismaClient } from '@prisma/client';
 import { generateObject } from 'ai';
 import bcrypt from 'bcrypt';
@@ -20,8 +18,6 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
-
-const client = new OpenAI(); 
 
 // Middleware
 app.use(cors());
@@ -117,41 +113,42 @@ async function generateMealPlanForUser(username: string) {
 
   const today = new Date();
   const dayOfWeek = today.getDay();
+  const tomorrowDayOfWeek = (dayOfWeek + 1) % 7;
+  
+  // Determine meals for today and tomorrow
   const meals = (dayOfWeek === 0 || dayOfWeek === 6) ? ["Brunch", "Dinner"] : ["Breakfast", "Lunch", "Dinner"];
-  const meals2 = (dayOfWeek + 1 === 0 || dayOfWeek + 1 === 6) ? ["Brunch", "Dinner"] : ["Breakfast", "Lunch", "Dinner"];
+  const meals2 = (tomorrowDayOfWeek === 0 || tomorrowDayOfWeek === 6) ? ["Brunch", "Dinner"] : ["Breakfast", "Lunch", "Dinner"];
     
+  // Generate today's meal plans (using uMD_Dining) and tomorrow's meal plans (using uMD_Dining2) in parallel
+  const todayPromises = meals.map(meal => generateMealPlanResponse(user_query, meal, true));
+  const tomorrowPromises = meals2.map(meal => generateMealPlanResponse(user_query, meal, false));
+  
+  // Execute both sets of promises in parallel
+  const [todayResults, tomorrowResults] = await Promise.all([
+    Promise.all(todayPromises),
+    Promise.all(tomorrowPromises)
+  ]);
+
+  // Build meal plan objects
   const mealPlans: Record<string, any> = {};
-  const mealPlans2: Record<string, any> = {}; 
+  meals.forEach((meal, index) => {
+    mealPlans[meal] = todayResults[index];
+  });
 
-  // Generate meal plan for each meal type
-  for (const meal of meals) {
-    const mealPlan = await generateMealPlanResponse(user_query, meal);
-    mealPlans[meal] = mealPlan;
-  }
+  const mealPlans2: Record<string, any> = {};
+  meals2.forEach((meal, index) => {
+    mealPlans2[meal] = tomorrowResults[index];
+  });
 
-  for (const meal of meals2) {
-    const mealPlan = await generateMealPlanResponse(user_query, meal, false)
-    mealPlans2[meal] = mealPlan
-  }
-
-  // Update user with meal plan
+  // Update user with both meal plans
   await prisma.user.update({
     where: { username: username },
     data: { 
       mealPlan: mealPlans,
-      mealPlanPopulated: false
-    }
-  });
-
-  await prisma.user.update({
-    where: { username: username },
-    data: { 
       nextMealPlan: mealPlans2,
       mealPlanPopulated: false
     }
   });
-
-
 
   return mealPlans;
 }
@@ -162,9 +159,8 @@ async function generateMealPlanResponse(user_query: string, meal_type: string, t
     ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
     : meal_type as any;
 
-  // Select which table to use based on today parameter
   // Use conditional logic directly to avoid TypeScript union type issues
-  const currMenuData = today 
+  const allMenuData = today 
     ? await prisma.uMD_Dining.findMany({
         select: {
           id: true,
@@ -196,118 +192,57 @@ async function generateMealPlanResponse(user_query: string, meal_type: string, t
         },
       });
 
-  const schema = {
-    format: {
-      type: "json_schema" as const,
-      name: "meal_plan",
-      strict: true,
-      schema: {
-        type: "object",
-        additionalProperties: false,
-        required: [
-          "Yahentamitisi_Dining_Hall",
-          "South_Campus_Dining_Hall",
-          "North_251_Dining_Hall"
-        ],
-        properties: {
-          Yahentamitisi_Dining_Hall: {
-            type: "array",
-            items: {
-              type: "object",
-              additionalProperties: false,
-              required: ["Meal_Option", "Description", "Entrees"],
-              properties: {
-                Meal_Option: { type: "string", minLength: 1 },
-                Description: { type: "string", minLength: 1 },
-                Entrees: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["id", "entree"],
-                    properties: {
-                      id: { type: "number" },
-                      entree: { type: "string", minLength: 1 }
-                    }
-                  }
-                }
-              }
-            }
-          },
-  
-          South_Campus_Dining_Hall: {
-            type: "array",
-            items: {
-              type: "object",
-              additionalProperties: false,
-              required: ["Meal_Option", "Description", "Entrees"],
-              properties: {
-                Meal_Option: { type: "string", minLength: 1 },
-                Description: { type: "string", minLength: 1 },
-                Entrees: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["id", "entree"],
-                    properties: {
-                      id: { type: "number" },
-                      entree: { type: "string", minLength: 1 }
-                    }
-                  }
-                }
-              }
-            }
-          },
-  
-          North_251_Dining_Hall: {
-            type: "array",
-            items: {
-              type: "object",
-              additionalProperties: false,
-              required: ["Meal_Option", "Description", "Entrees"],
-              properties: {
-                Meal_Option: { type: "string", minLength: 1 },
-                Description: { type: "string", minLength: 1 },
-                Entrees: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    additionalProperties: false,
-                    required: ["id", "entree"],
-                    properties: {
-                      id: { type: "number" },
-                      entree: { type: "string", minLength: 1 }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  const menuJson = JSON.stringify(allMenuData);
+
+  const mealPlanSchema = z.object({
+    Yahentamitisi_Dining_Hall: z.array(
+      z.object({
+        Meal_Option: z.string(),
+        Description: z.string(),
+        Entrees: z.array(z.object({ id: z.number(), entree: z.string() })), 
+        Calories: z.number(), 
+        Protein: z.number()
+      })
+    ),
+    South_Campus_Dining_Hall: z.array(
+      z.object({
+        Meal_Option: z.string(),
+        Description: z.string(),
+        Entrees: z.array(z.object({ id: z.number(), entree: z.string() })),
+        Calories: z.number(), 
+        Protein: z.number()
+      })
+    ),
+    North_251_Dining_Hall: z.array(
+      z.object({
+        Meal_Option: z.string(),
+        Description: z.string(),
+        Entrees: z.array(z.object({ id: z.number(), entree: z.string() })), 
+        Calories: z.number(), 
+        Protein: z.number() 
+      })
+    )
+  });
+
+  try {
+    const { object: mealPlan } = await generateObject({
+      model: google('gemini-2.5-flash'), 
+      schema: mealPlanSchema,
+      system: "You are an expert dietitian that gives users meal recommendations based on their dietary preferences and goals.",
+      prompt: "Using the attached dining hall nutrition database, generate meal options for the user at all 3 dining halls (South Campus, Yahentamitisi Dining Hall, and 251 North). " +
+        "You can either use entrees directly from the database or combine entrees with the same category in the database to create a meal option. " +
+        "Include the name of the meal option and a relatively concise description of the meal option. " +
+        "For each Meal_Option, the 'Entrees' array must contain the exact 'id' and 'entree' name from the database - use them exactly as written, do not modify. " +
+        "For each Meal_Option, calculate the Calories and Protein by summing up the individual 'totalCalories' and 'protein' values of each entree in the 'Entrees' array. You can find these individual 'totalCalories' and 'protein' values in the database included below. " +
+        "This is the user's query: " + user_query + " " +
+        "Here is the dining hall menu and nutrition database: " + menuJson,
+    });
+
+    return mealPlan;
+  } catch (error) {
+    console.error('Error generating meal plan:', error);
+    throw error;
   }
-
-  const menuJson = JSON.stringify(currMenuData);
-
-  const system_prompt = "You are a expert dietition that can gives users meal recommendations based on their dietary preferences and goals."
-
-  const prompt = "Using the attached dining hall nutrition database generate meal options for the users at all 3 dining halls (South Campus, Yahentamitsi Dining Hall, and 251 North)" +
-  "You can either use entrees directly from the database or combine entrees with the same category in the database to create a meal option" +
-  "Include the name of the meal option and a detailed description of the meal option" +
-  "For each Meal_Option, the 'Entrees' array must contain the exact 'id' and 'entree' name from the database - use them exactly as written, do not modify." + 
-  "This is the user's query: " + user_query + 
-  "Here is the dining hall menu and nutrition database: " + menuJson
-
-  const response = await client.responses.create({
-    model: "gpt-5",
-    instructions: system_prompt, 
-    input: prompt,
-    text: schema
-  })
-
-  return response.output_text;
 }
 
 // Health check endpoint

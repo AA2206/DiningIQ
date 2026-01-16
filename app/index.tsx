@@ -1,5 +1,5 @@
 // app/index.tsx
-import { View, Text, ScrollView, ActivityIndicator, Platform } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Platform, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
@@ -29,8 +29,50 @@ export default function Index() {
       const token = await AsyncStorage.getItem("token");
       
       if (token) {
-        // User has a token, redirect to account
-        router.replace("/account" as any);
+        // Check if onboarding is complete by verifying required fields
+        const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        try {
+          const response = await fetch(`${API_BASE_URL}/user-profile`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            const profile = await response.json();
+            
+            // Check if all required onboarding fields are present
+            const isOnboardingComplete = 
+              profile.gender !== null &&
+              profile.frequency !== null &&
+              profile.height !== null &&
+              profile.weight !== null &&
+              profile.age !== null &&
+              profile.goal !== null &&
+              profile.diet !== null &&
+              profile.other !== null; // other can be empty string, but must not be null
+
+            if (isOnboardingComplete) {
+              // Onboarding complete, redirect to account
+              router.replace("/account" as any);
+            } else {
+              // Onboarding incomplete, redirect to start of onboarding
+              router.replace("/onboarding/gender" as any);
+            }
+          } else if (response.status === 401) {
+            // Token is invalid, clear it and show landing page
+            await AsyncStorage.removeItem("token");
+            await AsyncStorage.removeItem("supabase_session");
+            setIsCheckingAuth(false);
+          } else {
+            // Other error, still try to redirect to onboarding
+            router.replace("/onboarding/gender" as any);
+          }
+        } catch (err) {
+          console.error("Error checking profile:", err);
+          // On error, redirect to onboarding to be safe
+          router.replace("/onboarding/gender" as any);
+        }
       } else {
         // No token, show landing page
         setIsCheckingAuth(false);
@@ -247,21 +289,6 @@ export default function Index() {
             </View>
           </View>
 
-          <View className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
-            <View className="flex-row items-center gap-4">
-              <View className="w-12 h-12 bg-blue-100 rounded-xl items-center justify-center">
-                <Text className="text-2xl">✨</Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-900 mb-1">
-                  Personalized Plans
-                </Text>
-                <Text className="text-sm text-gray-500">
-                  Customized for your dietary needs and goals
-                </Text>
-              </View>
-            </View>
-          </View>
         </View>
 
         {/* Error Message */}
@@ -271,32 +298,9 @@ export default function Index() {
           </View>
         )}
 
-        {/* Google Sign-In Button */}
-        <View className="w-full mb-3">
-          <TouchableOpacity 
-            className="w-full bg-blue-600 py-5 px-6 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-600/30"
-            onPress={handleGoogleSignIn}
-            disabled={isGoogleLoading}
-            activeOpacity={0.8}
-          >
-            {isGoogleLoading ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              <>
-                <View className="w-8 h-8 mr-3 items-center justify-center bg-white rounded-full">
-                  <Text className="text-lg font-bold" style={{ color: '#4285F4' }}>G</Text>
-                </View>
-                <Text className="text-white text-xl font-semibold">
-                  Continue with Google
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-
         {/* Apple Sign-In Button (iOS only) */}
         {Platform.OS === 'ios' && (
-          <View className="w-full">
+          <View className="w-full mb-3">
             <TouchableOpacity 
               className="w-full bg-black py-5 px-6 rounded-2xl flex-row items-center justify-center shadow-lg"
               onPress={handleAppleSignIn}
@@ -309,7 +313,7 @@ export default function Index() {
                 <>
                   <Text className="text-white text-xl mr-3">🍎</Text>
                   <Text className="text-white text-xl font-semibold">
-                    Continue with Apple
+                    Sign In with Apple
                   </Text>
                 </>
               )}
@@ -317,10 +321,46 @@ export default function Index() {
           </View>
         )}
 
-        {/* Footer Text */}
-        <View className="mt-8 items-center">
-          <Text className="text-sm text-gray-400 text-center">
-            Join thousands of users achieving their health goals
+        {/* Google Sign-In Button */}
+        <View className="w-full mb-4">
+          <TouchableOpacity 
+            className="w-full bg-white py-5 px-6 rounded-2xl flex-row items-center justify-center shadow-lg border border-gray-200"
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleLoading}
+            activeOpacity={0.8}
+          >
+            {isGoogleLoading ? (
+              <ActivityIndicator size="small" color="#666666" />
+            ) : (
+              <>
+                <View className="w-8 h-8 mr-3 items-center justify-center">
+                  <Text className="text-lg font-bold" style={{ color: '#4285F4' }}>G</Text>
+                </View>
+                <Text className="text-gray-700 text-xl font-semibold">
+                  Sign In with Google
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* Legal Disclaimer */}
+        <View className="mt-6 items-center px-4">
+          <Text className="text-sm text-gray-500 text-center">
+            By continuing, you agree to our{' '}
+            <Text 
+              className="underline"
+              onPress={() => Linking.openURL('https://your-privacy-policy-url.com')}
+            >
+              Privacy Policy
+            </Text>
+            {' '}and{' '}
+            <Text 
+              className="underline"
+              onPress={() => Linking.openURL('https://your-terms-url.com')}
+            >
+              Terms and Conditions
+            </Text>
           </Text>
         </View>
       </View>

@@ -41,7 +41,7 @@ async function main() {
     await copyNextMealPlanToMealPlan();
     
     const today = new Date();
-    const dayOfWeek = today.getDay() + 1;
+    const dayOfWeek = (today.getDay() + 1) % 7;
     const meals = (dayOfWeek === 0 || dayOfWeek === 6) ? ["Brunch", "Dinner"] : ["Breakfast", "Lunch", "Dinner"];
 
     const allUsers = await prisma.user.findMany();

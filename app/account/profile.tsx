@@ -256,34 +256,52 @@ export default function Profile() {
         },
       });
 
-      if (response.ok) {
+      // Always clear token and all local storage, regardless of response
+      // This ensures the user is logged out even if there's a network error
+      // after the account was successfully deleted on the backend
+      try {
         // Sign out from Google if signed in
-        try {
-          const currentUser = await GoogleSignin.getCurrentUser();
-          if (currentUser) {
-            await GoogleSignin.signOut();
-          }
-        } catch (err) {
-          console.log("Google sign out error:", err);
+        const currentUser = await GoogleSignin.getCurrentUser();
+        if (currentUser) {
+          await GoogleSignin.signOut();
         }
+      } catch (err) {
+        console.log("Google sign out error:", err);
+      }
 
-        // Clear local storage
-        await AsyncStorage.removeItem("token");
-        await AsyncStorage.removeItem("supabase_session");
-        
-        // Navigate to landing page
+      // Clear ALL local storage data
+      await AsyncStorage.clear();
+
+      if (response.ok) {
+        // Account deleted successfully, navigate to landing page
         router.replace("/" as any);
       } else {
+        // Even if deletion failed, we've cleared the token
+        // User will need to log in again
         const data = await response.json();
-        setError(data.error || "Failed to delete account");
+        setError(data.error || "Failed to delete account. You have been logged out.");
         setIsDeleting(false);
         setDeleteConfirmVisible(false);
+        // Still redirect to landing page since token is cleared
+        setTimeout(() => {
+          router.replace("/" as any);
+        }, 2000);
       }
     } catch (err) {
       console.error("Error deleting account:", err);
-      setError("Network error. Please try again.");
+      // Clear token even on network errors, in case account was deleted
+      try {
+        await AsyncStorage.clear();
+      } catch (clearErr) {
+        console.error("Error clearing storage:", clearErr);
+      }
+      setError("Network error. You have been logged out for security.");
       setIsDeleting(false);
       setDeleteConfirmVisible(false);
+      // Redirect to landing page since token is cleared
+      setTimeout(() => {
+        router.replace("/" as any);
+      }, 2000);
     }
   }
 
