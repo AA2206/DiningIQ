@@ -360,7 +360,7 @@ export default function Index() {
               ) : (
                 <>
                   <Image
-                    source={require('../images/AppleLogo.png')}
+                    source={require('../assets/images/AppleLogo.png')}
                     style={{ width: 18, height: 18, marginRight: 12 }}
                     resizeMode="contain"
                   />
@@ -386,7 +386,7 @@ export default function Index() {
             ) : (
               <>
                 <Image
-                  source={require('../images/GoogleLogo.png')}
+                  source={require('../assets/images/GoogleLogo.png')}
                   style={{ width: 18, height: 18, marginRight: 12 }}
                   resizeMode="contain"
                 />
