@@ -24,6 +24,39 @@ export default function Index() {
     checkAuthStatus();
   }, []);
 
+  // Helper function to check if onboarding is complete
+  async function checkOnboardingComplete(token: string): Promise<boolean> {
+    const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+    try {
+      const response = await fetch(`${API_BASE_URL}/user-profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const profile = await response.json();
+        
+        // Check if all required onboarding fields are present
+        const isOnboardingComplete = 
+          profile.gender !== null &&
+          profile.frequency !== null &&
+          profile.height !== null &&
+          profile.weight !== null &&
+          profile.age !== null &&
+          profile.goal !== null &&
+          profile.diet !== null &&
+          profile.other !== null; // other can be empty string, but must not be null
+
+        return isOnboardingComplete;
+      }
+      return false;
+    } catch (err) {
+      console.error("Error checking onboarding status:", err);
+      return false;
+    }
+  }
+
   async function checkAuthStatus() {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -133,9 +166,16 @@ export default function Index() {
 
       // Navigate based on whether user is new or returning
       if (data.isNewUser) {
+        // New user always goes to onboarding
         router.push("/onboarding/gender");
       } else {
-        router.replace("/account" as any);
+        // Returning user: check if onboarding is complete
+        const isOnboardingComplete = await checkOnboardingComplete(data.token);
+        if (isOnboardingComplete) {
+          router.replace("/account" as any);
+        } else {
+          router.replace("/onboarding/gender" as any);
+        }
       }
     } catch (error: any) {
       console.log('Google Sign-In Error:', error);
@@ -175,9 +215,10 @@ export default function Index() {
 
       console.log('Apple Sign-In Result:', JSON.stringify(credential, null, 2));
 
-      // Apple may not provide email on subsequent sign-ins
-      // Use user identifier as fallback
-      const email = credential.email || `${credential.user}@privaterelay.appleid.com`;
+      // Always use Apple user ID as the primary identifier
+      // credential.user is consistent across sign-ins, even with "Hide My Email"
+      const appleId = credential.user;
+      const email = credential.email; // May be null on subsequent sign-ins, that's okay
       const name = credential.fullName 
         ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
         : null;
@@ -191,9 +232,9 @@ export default function Index() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email,
+          appleId: appleId, // Always send the Apple user ID (required)
+          email: email, // Optional, may be null on subsequent sign-ins
           name: name,
-          appleId: credential.user, // Unique Apple user identifier
           identityToken: credential.identityToken, // Optional: for verification
         }),
       });
@@ -212,9 +253,16 @@ export default function Index() {
 
       // Navigate based on whether user is new or returning
       if (data.isNewUser) {
+        // New user always goes to onboarding
         router.push("/onboarding/gender");
       } else {
-        router.replace("/account" as any);
+        // Returning user: check if onboarding is complete
+        const isOnboardingComplete = await checkOnboardingComplete(data.token);
+        if (isOnboardingComplete) {
+          router.replace("/account" as any);
+        } else {
+          router.replace("/onboarding/gender" as any);
+        }
       }
     } catch (error: any) {
       console.log('Apple Sign-In Error:', error);
@@ -311,7 +359,55 @@ export default function Index() {
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
                 <>
-                  <Text className="text-white text-xl mr-3">🍎</Text>
+                  <View className="mr-3 items-center justify-center" style={{ width: 20, height: 24 }}>
+                    {/* Apple Logo - Accurate silhouette matching Apple's iconic design */}
+                    <View style={{
+                      width: 20,
+                      height: 24,
+                      position: 'relative',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                    }}>
+                      {/* Apple body - rounded shape with distinctive bottom-right curve */}
+                      <View style={{
+                        width: 17,
+                        height: 21,
+                        backgroundColor: '#ffffff',
+                        borderRadius: 8.5,
+                        borderTopLeftRadius: 8.5,
+                        borderTopRightRadius: 8.5,
+                        borderBottomLeftRadius: 8.5,
+                        borderBottomRightRadius: 1.5,
+                        position: 'relative',
+                      }}>
+                        {/* Apple bite - creates the iconic bite mark on right side */}
+                        <View style={{
+                          position: 'absolute',
+                          top: 9,
+                          right: -1.5,
+                          width: 6.5,
+                          height: 6.5,
+                          backgroundColor: '#000000',
+                          borderRadius: 3.25,
+                        }} />
+                      </View>
+                      {/* Apple leaf - positioned at top-right, angled naturally */}
+                      <View style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 4.5,
+                        width: 4.5,
+                        height: 6.5,
+                        backgroundColor: '#ffffff',
+                        borderRadius: 2.25,
+                        borderTopLeftRadius: 2.25,
+                        borderTopRightRadius: 2.25,
+                        borderBottomLeftRadius: 0,
+                        borderBottomRightRadius: 0,
+                        transform: [{ rotate: '32deg' }],
+                      }} />
+                    </View>
+                  </View>
                   <Text className="text-white text-xl font-semibold">
                     Sign In with Apple
                   </Text>

@@ -1,5 +1,5 @@
 // app/account/mealLogging.tsx
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -1231,9 +1231,19 @@ export default function MealLogging() {
         transparent={true}
         onRequestClose={handleCloseModal}
       >
-        <View className="flex-1 bg-black/50 items-center justify-center px-4">
-          <View className="bg-white rounded-2xl w-full max-w-md p-6 max-h-[90%]">
-            <ScrollView showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <View className="flex-1 bg-black/50 items-center justify-center px-4">
+            <View className="bg-white rounded-2xl w-full max-w-md p-6" style={{ maxHeight: '90%' }}>
+              <ScrollView 
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 20 }}
+                nestedScrollEnabled={true}
+              >
               {/* Header */}
               <View className="flex-row items-center justify-between mb-6">
                 <Text className="text-2xl font-bold text-gray-900">
@@ -1320,7 +1330,11 @@ export default function MealLogging() {
                     
                     {/* Entrees List */}
                     <View className="max-h-48 border border-gray-200 rounded-xl p-2">
-                      <ScrollView nestedScrollEnabled>
+                      <ScrollView 
+                        nestedScrollEnabled={true}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={true}
+                      >
                         {filteredEntrees.length === 0 ? (
                           <Text className="text-gray-500 text-sm text-center py-4">
                             No entrees found matching "{entreeSearchQuery}"
@@ -1412,9 +1426,10 @@ export default function MealLogging() {
                   {editingMeal ? "Update Meal" : "Add Meal"}
                 </Text>
               </TouchableOpacity>
-            </ScrollView>
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Copy Meal Modal */}

@@ -136,9 +136,10 @@ export default function Register() {
 
       console.log('Apple Sign-In Result:', JSON.stringify(credential, null, 2));
 
-      // Apple may not provide email on subsequent sign-ins
-      // Use user identifier as fallback
-      const email = credential.email || `${credential.user}@privaterelay.appleid.com`;
+      // Always use Apple user ID as the primary identifier
+      // credential.user is consistent across sign-ins, even with "Hide My Email"
+      const appleId = credential.user;
+      const email = credential.email; // May be null on subsequent sign-ins, that's okay
       const name = credential.fullName 
         ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
         : null;
@@ -152,9 +153,9 @@ export default function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email,
+          appleId: appleId, // Always send the Apple user ID (required)
+          email: email, // Optional, may be null on subsequent sign-ins
           name: name,
-          appleId: credential.user, // Unique Apple user identifier
           identityToken: credential.identityToken, // Optional: for verification
         }),
       });

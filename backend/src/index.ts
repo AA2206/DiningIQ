@@ -392,15 +392,16 @@ app.post('/google-auth', async (req: Request, res: Response) => {
 
 // POST /apple-auth - Handle Apple Sign-In
 app.post('/apple-auth', async (req: Request, res: Response) => {
-  const { email, appleId } = req.body;
+  const { appleId } = req.body; // email is optional and not used for identification
 
-  if (!email && !appleId) {
-    return res.status(400).json({ error: 'Email or Apple ID is required' });
+  if (!appleId) {
+    return res.status(400).json({ error: 'Apple ID is required' });
   }
 
   try {
-    // Use email if provided, otherwise use Apple ID as username
-    const username = email || `apple_${appleId}`;
+    // Always use Apple ID as the primary identifier
+    // This is consistent across sign-ins, even when "Hide My Email" is used
+    const username = `apple_${appleId}`;
     
     // Check if user exists
     let user = await prisma.user.findUnique({
