@@ -1239,7 +1239,7 @@ export default function MealLogging() {
           <View className="flex-1 bg-black/50 items-center justify-center px-4">
             <View className="bg-white rounded-2xl w-full max-w-md p-6" style={{ maxHeight: '90%' }}>
               <ScrollView 
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 20 }}
                 nestedScrollEnabled={true}

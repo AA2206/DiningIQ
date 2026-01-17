@@ -1,5 +1,5 @@
 // app/index.tsx
-import { View, Text, ScrollView, ActivityIndicator, Platform, Linking } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Platform, Linking, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
@@ -359,55 +359,11 @@ export default function Index() {
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
                 <>
-                  <View className="mr-3 items-center justify-center" style={{ width: 20, height: 24 }}>
-                    {/* Apple Logo - Accurate silhouette matching Apple's iconic design */}
-                    <View style={{
-                      width: 20,
-                      height: 24,
-                      position: 'relative',
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                    }}>
-                      {/* Apple body - rounded shape with distinctive bottom-right curve */}
-                      <View style={{
-                        width: 17,
-                        height: 21,
-                        backgroundColor: '#ffffff',
-                        borderRadius: 8.5,
-                        borderTopLeftRadius: 8.5,
-                        borderTopRightRadius: 8.5,
-                        borderBottomLeftRadius: 8.5,
-                        borderBottomRightRadius: 1.5,
-                        position: 'relative',
-                      }}>
-                        {/* Apple bite - creates the iconic bite mark on right side */}
-                        <View style={{
-                          position: 'absolute',
-                          top: 9,
-                          right: -1.5,
-                          width: 6.5,
-                          height: 6.5,
-                          backgroundColor: '#000000',
-                          borderRadius: 3.25,
-                        }} />
-                      </View>
-                      {/* Apple leaf - positioned at top-right, angled naturally */}
-                      <View style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 4.5,
-                        width: 4.5,
-                        height: 6.5,
-                        backgroundColor: '#ffffff',
-                        borderRadius: 2.25,
-                        borderTopLeftRadius: 2.25,
-                        borderTopRightRadius: 2.25,
-                        borderBottomLeftRadius: 0,
-                        borderBottomRightRadius: 0,
-                        transform: [{ rotate: '32deg' }],
-                      }} />
-                    </View>
-                  </View>
+                  <Image
+                    source={require('../images/AppleLogo.png')}
+                    style={{ width: 18, height: 18, marginRight: 12 }}
+                    resizeMode="contain"
+                  />
                   <Text className="text-white text-xl font-semibold">
                     Sign In with Apple
                   </Text>
@@ -429,9 +385,11 @@ export default function Index() {
               <ActivityIndicator size="small" color="#666666" />
             ) : (
               <>
-                <View className="w-8 h-8 mr-3 items-center justify-center">
-                  <Text className="text-lg font-bold" style={{ color: '#4285F4' }}>G</Text>
-                </View>
+                <Image
+                  source={require('../images/GoogleLogo.png')}
+                  style={{ width: 18, height: 18, marginRight: 12 }}
+                  resizeMode="contain"
+                />
                 <Text className="text-gray-700 text-xl font-semibold">
                   Sign In with Google
                 </Text>
