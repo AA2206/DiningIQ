@@ -361,7 +361,7 @@ export default function Index() {
                 <>
                   <Image
                     source={require('../assets/images/AppleLogo.png')}
-                    style={{ width: 18, height: 18, marginRight: 12 }}
+                    style={{ width: 22, height: 22, marginRight: 12 }}
                     resizeMode="contain"
                   />
                   <Text className="text-white text-xl font-semibold">
@@ -387,7 +387,7 @@ export default function Index() {
               <>
                 <Image
                   source={require('../assets/images/GoogleLogo.png')}
-                  style={{ width: 18, height: 18, marginRight: 12 }}
+                  style={{ width: 22, height: 22, marginRight: 12 }}
                   resizeMode="contain"
                 />
                 <Text className="text-gray-700 text-xl font-semibold">
@@ -404,14 +404,14 @@ export default function Index() {
             By continuing, you agree to our{' '}
             <Text 
               className="underline"
-              onPress={() => Linking.openURL('https://your-privacy-policy-url.com')}
+              onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/privacy-policy')}
             >
               Privacy Policy
             </Text>
             {' '}and{' '}
             <Text 
               className="underline"
-              onPress={() => Linking.openURL('https://your-terms-url.com')}
+              onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/terms-of-service')}
             >
               Terms and Conditions
             </Text>

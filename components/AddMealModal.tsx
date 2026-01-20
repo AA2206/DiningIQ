@@ -364,7 +364,11 @@ export default function AddMealModal({
                   
                   {/* Entrees List */}
                   <View className="max-h-48 border border-gray-200 rounded-xl p-2">
-                    <ScrollView nestedScrollEnabled>
+                    <ScrollView 
+                      nestedScrollEnabled
+                      showsVerticalScrollIndicator={true}
+                      indicatorStyle="default"
+                    >
                       {filteredEntrees.length === 0 ? (
                         <Text className="text-gray-500 text-sm text-center py-4">
                           No entrees found matching "{searchQuery}"

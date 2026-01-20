@@ -1240,6 +1240,7 @@ export default function MealLogging() {
             <View className="bg-white rounded-2xl w-full max-w-md p-6" style={{ maxHeight: '90%' }}>
               <ScrollView 
                 showsVerticalScrollIndicator={true}
+                indicatorStyle="default"
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 20 }}
                 nestedScrollEnabled={true}
@@ -1334,6 +1335,7 @@ export default function MealLogging() {
                         nestedScrollEnabled={true}
                         keyboardShouldPersistTaps="handled"
                         showsVerticalScrollIndicator={true}
+                        indicatorStyle="default"
                       >
                         {filteredEntrees.length === 0 ? (
                           <Text className="text-gray-500 text-sm text-center py-4">
