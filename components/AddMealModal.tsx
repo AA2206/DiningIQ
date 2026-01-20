@@ -262,7 +262,10 @@ export default function AddMealModal({
     >
       <View className="flex-1 bg-black/50 items-center justify-center px-4">
         <View className="bg-white rounded-2xl w-full max-w-md p-6 max-h-[90%]">
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={true}
+            indicatorStyle="default"
+          >
             {/* Header */}
             <View className="flex-row items-center justify-between mb-6">
               <Text className="text-2xl font-bold text-gray-900">

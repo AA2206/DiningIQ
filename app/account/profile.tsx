@@ -331,7 +331,11 @@ export default function Profile() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <ScrollView 
+      className="flex-1 bg-gray-50"
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="default"
+    >
       <View className="px-6 pt-16 pb-8">
         {/* Header */}
         <Text className="text-3xl font-bold text-gray-900 mb-6">Profile</Text>

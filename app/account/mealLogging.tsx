@@ -1045,7 +1045,11 @@ export default function MealLogging() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <ScrollView className="flex-1">
+      <ScrollView 
+        className="flex-1"
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="default"
+      >
         {/* Date Selector - Swipe left/right to change week */}
         <GestureDetector gesture={swipeGesture}>
           <View className="bg-white px-3 py-4">

@@ -56,7 +56,11 @@ export default function Metrics() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView 
+      className="flex-1 bg-white"
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="default"
+    >
       <View className="flex-1 min-h-screen px-6 py-12 justify-center">
         {/* Title */}
         <Text className="text-4xl font-bold text-gray-900 mb-12 text-center">

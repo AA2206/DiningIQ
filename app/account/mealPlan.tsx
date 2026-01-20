@@ -258,7 +258,11 @@ export default function MealPlan() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-      <ScrollView className="flex-1">
+      <ScrollView 
+        className="flex-1"
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="default"
+      >
         <View className="px-4 pt-6 pb-4">
           <Text className="text-4xl font-bold text-gray-900 mb-2">
             Meal Plan
