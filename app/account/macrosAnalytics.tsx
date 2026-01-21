@@ -322,7 +322,7 @@ export default function MacrosAnalytics() {
       <ScrollView 
         className="flex-1"
         showsVerticalScrollIndicator={true}
-        indicatorStyle="default"
+        indicatorStyle="black"
       >
         {/* Header */}
         <View className="px-4 pt-6 pb-4">

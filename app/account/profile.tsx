@@ -334,7 +334,7 @@ export default function Profile() {
     <ScrollView 
       className="flex-1 bg-gray-50"
       showsVerticalScrollIndicator={true}
-      indicatorStyle="default"
+      indicatorStyle="black"
     >
       <View className="px-6 pt-16 pb-8">
         {/* Header */}

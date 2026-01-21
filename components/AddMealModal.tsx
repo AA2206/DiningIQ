@@ -264,7 +264,7 @@ export default function AddMealModal({
         <View className="bg-white rounded-2xl w-full max-w-md p-6 max-h-[90%]">
           <ScrollView 
             showsVerticalScrollIndicator={true}
-            indicatorStyle="default"
+            indicatorStyle="black"
           >
             {/* Header */}
             <View className="flex-row items-center justify-between mb-6">
@@ -370,7 +370,7 @@ export default function AddMealModal({
                     <ScrollView 
                       nestedScrollEnabled
                       showsVerticalScrollIndicator={true}
-                      indicatorStyle="default"
+                      indicatorStyle="black"
                     >
                       {filteredEntrees.length === 0 ? (
                         <Text className="text-gray-500 text-sm text-center py-4">

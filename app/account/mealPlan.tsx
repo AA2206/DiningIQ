@@ -261,7 +261,7 @@ export default function MealPlan() {
       <ScrollView 
         className="flex-1"
         showsVerticalScrollIndicator={true}
-        indicatorStyle="default"
+        indicatorStyle="black"
       >
         <View className="px-4 pt-6 pb-4">
           <Text className="text-4xl font-bold text-gray-900 mb-2">

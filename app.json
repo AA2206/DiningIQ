@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.dietiq.app",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -53,7 +53,10 @@
           "iosUrlScheme": "com.googleusercontent.apps.314360585010-told5d99b7mhc9318rpglgc9ktie66dg"
         }
       ],
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

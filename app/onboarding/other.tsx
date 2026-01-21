@@ -57,7 +57,7 @@ export default function Other() {
     <ScrollView 
       className="flex-1 bg-white"
       showsVerticalScrollIndicator={true}
-      indicatorStyle="default"
+      indicatorStyle="black"
     >
       <View className="flex-1 min-h-screen px-6 py-12 justify-center">
         {/* Title */}

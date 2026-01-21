@@ -290,7 +290,7 @@ export default function Index() {
     <ScrollView 
       className="flex-1 bg-gradient-to-b from-blue-50 to-white"
       showsVerticalScrollIndicator={true}
-      indicatorStyle="default"
+      indicatorStyle="black"
     >
       <View className="flex-1 min-h-screen px-6 py-16 justify-center">
         {/* Hero Section */}
