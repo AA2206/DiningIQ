@@ -154,10 +154,22 @@ async function generateMealPlanForUser(username: string) {
 }
 
 async function generateMealPlanResponse(user_query: string, meal_type: string, today: boolean = true) {
-  // If meal_type is Brunch, include Breakfast and Lunch items as well
-  const mealFilter = meal_type === "Brunch" 
-    ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
-    : meal_type as any;
+  // Determine which meal types to include based on the selected meal type
+  let mealFilter: any;
+  
+  if (meal_type === "Brunch") {
+    // Brunch shows: Breakfast + Lunch + Brunch
+    mealFilter = { in: ["Brunch", "Breakfast", "Lunch"] as any[] };
+  } else if (meal_type === "Breakfast") {
+    // Breakfast shows: Breakfast + Brunch
+    mealFilter = { in: ["Breakfast", "Brunch"] as any[] };
+  } else if (meal_type === "Lunch") {
+    // Lunch shows: Lunch + Brunch
+    mealFilter = { in: ["Lunch", "Brunch"] as any[] };
+  } else {
+    // Dinner shows: Just Dinner
+    mealFilter = meal_type as any;
+  }
 
   // Use conditional logic directly to avoid TypeScript union type issues
   const allMenuData = today 
@@ -712,6 +724,39 @@ app.post('/modify-meal-plan', authenticateJWT, async (req: Request, res: Respons
   }
 });
 
+// GET /generation-status
+app.get('/generation-status', authenticateJWT, async (req: Request, res: Response) => {
+  const username = (req as any).user?.username;
+
+  if (!username) {
+    return res.status(401).json({ error: 'Username missing from token' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        mealPlanGenerating: true,
+        mealPlanGeneratedAt: true,
+        mealPlan: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({
+      inProgress: user.mealPlanGenerating || false,
+      startedAt: user.mealPlanGeneratedAt?.toISOString() || null,
+      hasMealPlan: !!user.mealPlan,
+    });
+  } catch (error: any) {
+    console.error('Error checking generation status:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // POST /generate-meal-plan
 app.post('/generate-meal-plan', authenticateJWT, async (req: Request, res: Response) => {
   const username = (req as any).user?.username;
@@ -721,10 +766,74 @@ app.post('/generate-meal-plan', authenticateJWT, async (req: Request, res: Respo
   }
 
   try {
+    // Check if generation is already in progress
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        mealPlanGenerating: true,
+        mealPlan: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // If meal plan already exists, return it
+    if (user.mealPlan) {
+      return res.status(200).json({ 
+        message: 'Meal plan already exists', 
+        mealPlan: user.mealPlan 
+      });
+    }
+
+    // If generation is already in progress, return status
+    if (user.mealPlanGenerating) {
+      const userWithTimestamp = await prisma.user.findUnique({
+        where: { username },
+        select: { mealPlanGeneratedAt: true }
+      });
+      return res.status(202).json({ 
+        message: 'Meal plan generation already in progress',
+        inProgress: true,
+        startedAt: userWithTimestamp?.mealPlanGeneratedAt?.toISOString() || null
+      });
+    }
+
+    // Set flag to prevent duplicates and record start time
+    await prisma.user.update({
+      where: { username },
+      data: { 
+        mealPlanGenerating: true,
+        mealPlanGeneratedAt: new Date()
+      }
+    });
+
+    // Generate meal plan (this may take ~2 minutes)
     const mealPlan = await generateMealPlanForUser(username);
+    
+    // Clear flag and save meal plan
+    await prisma.user.update({
+      where: { username },
+      data: { 
+        mealPlan: mealPlan,
+        mealPlanGenerating: false,
+      }
+    });
+
     return res.status(200).json({ message: 'Meal plan generated successfully', mealPlan });
   } catch (error: any) {
     console.error('Error generating meal plan:', error);
+    
+    // Clear flag on error
+    try {
+      await prisma.user.update({
+        where: { username: (req as any).user?.username },
+        data: { mealPlanGenerating: false }
+      });
+    } catch (updateError) {
+      console.error('Error clearing generation flag:', updateError);
+    }
     
     if (error.message === 'User not found') {
       return res.status(404).json({ error: 'User not found' });

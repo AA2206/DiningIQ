@@ -13,10 +13,22 @@ const client = new OpenAI();
 async function generateMealPlanResponse(user_query: string, meal_type: string, today: boolean = true) {
   console.log(`\n=== Generating meal plan for ${meal_type} (today: ${today}) ===`);
   
-  // If meal_type is Brunch, include Breakfast and Lunch items as well
-  const mealFilter = meal_type === "Brunch" 
-    ? { in: ["Brunch", "Breakfast", "Lunch"] as any[] }
-    : meal_type as any;
+  // Determine which meal types to include based on the selected meal type
+  let mealFilter: any;
+  
+  if (meal_type === "Brunch") {
+    // Brunch shows: Breakfast + Lunch + Brunch
+    mealFilter = { in: ["Brunch", "Breakfast", "Lunch"] as any[] };
+  } else if (meal_type === "Breakfast") {
+    // Breakfast shows: Breakfast + Brunch
+    mealFilter = { in: ["Breakfast", "Brunch"] as any[] };
+  } else if (meal_type === "Lunch") {
+    // Lunch shows: Lunch + Brunch
+    mealFilter = { in: ["Lunch", "Brunch"] as any[] };
+  } else {
+    // Dinner shows: Just Dinner
+    mealFilter = meal_type as any;
+  }
 
   console.log(`Fetching menu data from ${today ? 'uMD_Dining' : 'uMD_Dining2'}...`);
   

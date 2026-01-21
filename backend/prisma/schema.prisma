@@ -54,6 +54,8 @@ model User {
   mealPlan          Json?
   nextMealPlan      Json?
   mealPlanPopulated Boolean   @default(false)
+  mealPlanGenerating Boolean  @default(false)
+  mealPlanGeneratedAt DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }

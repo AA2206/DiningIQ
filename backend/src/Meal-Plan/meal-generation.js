@@ -149,7 +149,21 @@ async function main() {
         "allergies/dietary restrictions."
 
         for (const meal of meals) {
-            const mealFilter = meal === "Brunch" ? { in: ["Brunch", "Breakfast", "Lunch"] } : meal;
+            // Determine which meal types to include based on the selected meal type
+            let mealFilter;
+            if (meal === "Brunch") {
+                // Brunch shows: Breakfast + Lunch + Brunch
+                mealFilter = { in: ["Brunch", "Breakfast", "Lunch"] };
+            } else if (meal === "Breakfast") {
+                // Breakfast shows: Breakfast + Brunch
+                mealFilter = { in: ["Breakfast", "Brunch"] };
+            } else if (meal === "Lunch") {
+                // Lunch shows: Lunch + Brunch
+                mealFilter = { in: ["Lunch", "Brunch"] };
+            } else {
+                // Dinner shows: Just Dinner
+                mealFilter = meal;
+            }
     
             const allMenuData = await prisma.uMD_Dining2.findMany({
                 select: {
