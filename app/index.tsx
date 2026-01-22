@@ -62,8 +62,31 @@ export default function Index() {
       const token = await AsyncStorage.getItem("token");
       
       if (token) {
-        // Check if onboarding is complete by verifying required fields
         const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        
+        // First, check if meal plan generation is in progress
+        try {
+          const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            
+            // If generation is in progress, redirect to loading page
+            if (statusData.inProgress) {
+              router.replace("/loading" as any);
+              return;
+            }
+          }
+        } catch (statusErr) {
+          console.error("Error checking generation status:", statusErr);
+          // Continue with other checks if generation status check fails
+        }
+
+        // Check if onboarding is complete by verifying required fields
         try {
           const response = await fetch(`${API_BASE_URL}/user-profile`, {
             headers: {
@@ -164,6 +187,28 @@ export default function Index() {
         await AsyncStorage.setItem('token', data.token);
       }
 
+      // Check if meal plan generation is in progress
+      try {
+        const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          
+          // If generation is in progress, redirect to loading page
+          if (statusData.inProgress) {
+            router.replace("/loading" as any);
+            return;
+          }
+        }
+      } catch (statusErr) {
+        console.error("Error checking generation status:", statusErr);
+        // Continue with normal flow if generation status check fails
+      }
+
       // Navigate based on whether user is new or returning
       if (data.isNewUser) {
         // New user always goes to onboarding
@@ -249,6 +294,28 @@ export default function Index() {
       // Store backend JWT token
       if (data.token) {
         await AsyncStorage.setItem('token', data.token);
+      }
+
+      // Check if meal plan generation is in progress
+      try {
+        const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+
+        if (statusResponse.ok) {
+          const statusData = await statusResponse.json();
+          
+          // If generation is in progress, redirect to loading page
+          if (statusData.inProgress) {
+            router.replace("/loading" as any);
+            return;
+          }
+        }
+      } catch (statusErr) {
+        console.error("Error checking generation status:", statusErr);
+        // Continue with normal flow if generation status check fails
       }
 
       // Navigate based on whether user is new or returning
