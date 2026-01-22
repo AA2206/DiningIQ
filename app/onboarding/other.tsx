@@ -40,7 +40,13 @@ export default function Other() {
       });
 
       if (response.ok) {
-        router.push("/loading" as any);
+        // Read the response body to ensure the request is fully processed
+        await response.json();
+        // Use replace instead of push to ensure navigation completes
+        // Add a small delay to ensure the response is fully processed
+        setTimeout(() => {
+          router.replace("/loading" as any);
+        }, 100);
       } else {
         const data = await response.json();
         setError(data.error || "Failed to save information");
