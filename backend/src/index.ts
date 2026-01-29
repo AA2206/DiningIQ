@@ -514,8 +514,9 @@ app.get('/user-profile', authenticateJWT, async (req: Request, res: Response) =>
 
     const goalMap: Record<string, string> = {
       'BUILD_MUSCLE': 'Build Muscle',
-      'LOSE_WEIGHT': 'Get Lean',
-      'MAINTAIN': 'Improve Fitness'
+      // Keep these aligned with the labels shown in the onboarding UI
+      'LOSE_WEIGHT': 'Lose Weight',
+      'MAINTAIN_FITNESS': 'Maintain Fitness',
     };
 
     const dietMap: Record<string, string> = {
@@ -585,10 +586,18 @@ app.post('/update-field', authenticateJWT, async (req: Request, res: Response) =
     } else if (field === 'goal') {
       const goalMap: Record<string, string> = {
         'Build Muscle': 'BUILD_MUSCLE',
+        'Lose Weight': 'LOSE_WEIGHT',
         'Get Lean': 'LOSE_WEIGHT',
-        'Improve Fitness': 'MAINTAIN'
+        'Maintain Fitness': 'MAINTAIN_FITNESS',
+        'Improve Fitness': 'MAINTAIN_FITNESS',
       };
       valueToStore = goalMap[selectedValue] || selectedValue;
+
+      // Prevent invalid enum values from reaching Prisma (would otherwise throw and become a 500)
+      const allowedGoalValues = new Set(['BUILD_MUSCLE', 'LOSE_WEIGHT', 'MAINTAIN_FITNESS']);
+      if (!allowedGoalValues.has(valueToStore)) {
+        return res.status(400).json({ error: 'Invalid goal value' });
+      }
     } else if (field === 'diet') {
       const dietMap: Record<string, string> = {
         'Classic': 'OMNIVORE',

@@ -188,7 +188,7 @@ async function main() {
             "This is the user's query: " + user_query + 
             "Here is the dining hall menu and nutrition database: " + menuJson
 
-            batchData.push({"custom_id": user_data.username + "_" + meal, "method": "POST", "url": "/v1/responses", "body": {"model": "gpt-5", "instructions": system_prompt, "input": prompt, "text": schema}})
+            batchData.push({"custom_id": user_data.username + "_" + meal, "method": "POST", "url": "/v1/responses", "body": {"model": "gpt-5-mini", "instructions": system_prompt, "input": prompt, "text": schema}})
         }
     }
 

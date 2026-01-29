@@ -26,8 +26,7 @@ enum MealType {
 
 enum Goal {
   LOSE_WEIGHT
-  GAIN_WEIGHT
-  MAINTAIN
+  MAINTAIN_FITNESS
   BUILD_MUSCLE
 }
 

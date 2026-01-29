@@ -179,7 +179,7 @@ async function generateMealPlanResponse(user_query: string, meal_type: string, t
   
   try {
     const response = await client.responses.create({
-      model: "gpt-5",
+      model: "gpt-5-mini",
       instructions: system_prompt, 
       input: prompt,
       text: schema
