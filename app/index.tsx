@@ -115,8 +115,7 @@ export default function Index() {
               // Onboarding incomplete, redirect to start of onboarding
               router.replace("/onboarding/gender" as any);
             }
-          } else if (response.status === 401) {
-            // Token is invalid, clear it and show landing page
+          } else if (response.status === 401 || response.status === 403) {
             await AsyncStorage.removeItem("token");
             await AsyncStorage.removeItem("supabase_session");
             setIsCheckingAuth(false);

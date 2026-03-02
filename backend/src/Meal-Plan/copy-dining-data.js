@@ -36,6 +36,7 @@ async function copyDiningData() {
             
             await prisma.uMD_Dining.createMany({
                 data: batch.map(item => ({
+                    id: item.id,
                     entree: item.entree,
                     diningHall: item.diningHall,
                     meal: item.meal,
