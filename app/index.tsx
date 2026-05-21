@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import '../global.css';
+import { api } from '../lib/api';
 
 // Configure Google Sign-In
 GoogleSignin.configure({
@@ -25,20 +26,15 @@ export default function Index() {
   }, []);
 
   // Helper function to check if onboarding is complete
-  async function checkOnboardingComplete(token: string): Promise<boolean> {
-    const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  async function checkOnboardingComplete(): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/user-profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.getUserProfile();
 
       if (response.ok) {
         const profile = await response.json();
-        
+
         // Check if all required onboarding fields are present
-        const isOnboardingComplete = 
+        const isOnboardingComplete =
           profile.gender !== null &&
           profile.frequency !== null &&
           profile.height !== null &&
@@ -62,15 +58,9 @@ export default function Index() {
       const token = await AsyncStorage.getItem("token");
       
       if (token) {
-        const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-        
         // First, check if meal plan generation is in progress
         try {
-          const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const statusResponse = await api.getGenerationStatus();
 
           if (statusResponse.ok) {
             const statusData = await statusResponse.json();
@@ -88,11 +78,7 @@ export default function Index() {
 
         // Check if onboarding is complete by verifying required fields
         try {
-          const response = await fetch(`${API_BASE_URL}/user-profile`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const response = await api.getUserProfile();
 
           if (response.ok) {
             const profile = await response.json();
@@ -160,19 +146,7 @@ export default function Index() {
       }
 
       // Send Google user info to our backend
-      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${API_BASE_URL}/google-auth`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: user.email,
-          name: user.name,
-          googleId: user.id,
-        }),
-      });
+      const response = await api.googleAuth(user.email, user.name, user.id);
 
       const data = await response.json();
 
@@ -188,15 +162,11 @@ export default function Index() {
 
       // Check if meal plan generation is in progress
       try {
-        const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-          },
-        });
+        const statusResponse = await api.getGenerationStatus();
 
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
-          
+
           // If generation is in progress, redirect to loading page
           if (statusData.inProgress) {
             router.replace("/loading" as any);
@@ -214,7 +184,7 @@ export default function Index() {
         router.push("/onboarding/gender");
       } else {
         // Returning user: check if onboarding is complete
-        const isOnboardingComplete = await checkOnboardingComplete(data.token);
+        const isOnboardingComplete = await checkOnboardingComplete();
         if (isOnboardingComplete) {
           router.replace("/account" as any);
         } else {
@@ -268,20 +238,7 @@ export default function Index() {
         : null;
 
       // Send Apple user info to backend
-      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${API_BASE_URL}/apple-auth`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appleId: appleId, // Always send the Apple user ID (required)
-          email: email, // Optional, may be null on subsequent sign-ins
-          name: name,
-          identityToken: credential.identityToken, // Optional: for verification
-        }),
-      });
+      const response = await api.appleAuth(appleId, email, name, credential.identityToken);
 
       const data = await response.json();
 
@@ -297,15 +254,11 @@ export default function Index() {
 
       // Check if meal plan generation is in progress
       try {
-        const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-          },
-        });
+        const statusResponse = await api.getGenerationStatus();
 
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
-          
+
           // If generation is in progress, redirect to loading page
           if (statusData.inProgress) {
             router.replace("/loading" as any);
@@ -323,7 +276,7 @@ export default function Index() {
         router.push("/onboarding/gender");
       } else {
         // Returning user: check if onboarding is complete
-        const isOnboardingComplete = await checkOnboardingComplete(data.token);
+        const isOnboardingComplete = await checkOnboardingComplete();
         if (isOnboardingComplete) {
           router.replace("/account" as any);
         } else {

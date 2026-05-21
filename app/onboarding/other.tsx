@@ -2,16 +2,14 @@
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import '../../global.css';
+import { api } from '../../lib/api';
 
 export default function Other() {
   const router = useRouter();
   const [other, setOther] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
   async function handleSubmit() {
     if (!other.trim()) {
@@ -23,21 +21,7 @@ export default function Other() {
     setError("");
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Not authenticated. Please login again.");
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/other`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ other }),
-      });
+      const response = await api.updateOther(other);
 
       if (response.ok) {
         // Read the response body to ensure the request is fully processed

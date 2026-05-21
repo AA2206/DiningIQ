@@ -3,8 +3,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { View, Text, ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import '../../global.css';
+import { api } from '../../lib/api';
 
 // Stat Card Component
 interface StatCardProps {
@@ -174,9 +174,6 @@ function BarChart({ title, subtitle, data, unit, dotColor, maxValue }: BarChartP
 }
 
 export default function MacrosAnalytics() {
-  // API Base URL
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
   // State for selected date (used to determine which week to show)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
@@ -241,24 +238,7 @@ export default function MacrosAnalytics() {
     async function fetchWeeklyMacros() {
       setLoading(true);
       try {
-        // Get authentication token
-        const token = await AsyncStorage.getItem("token");
-        if (!token) {
-          console.error("Not authenticated");
-          setError("Not authenticated");
-          setLoading(false);
-          return;
-        }
-
-        // Make API call with date parameter
-        const dateISO = selectedDate.toISOString();
-        const response = await fetch(`${API_BASE_URL}/weekly-macros?date=${encodeURIComponent(dateISO)}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.getWeeklyMacros(selectedDate.toISOString());
 
         if (response.ok) {
           const data = await response.json();

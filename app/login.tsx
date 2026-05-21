@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import AuthForm, { AuthFormRef } from '../components/AuthForm';
+import { api } from '../lib/api';
 
 // Configure Google Sign-In
 GoogleSignin.configure({
@@ -20,15 +21,7 @@ export default function Login() {
 
   const handleSubmit = async (username: string, password: string) => {
     try {
-      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await api.login(username, password);
 
       const data = await response.json();
 
@@ -68,19 +61,7 @@ export default function Login() {
       }
 
       // Send Google user info to our backend
-      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${API_BASE_URL}/google-auth`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: user.email,
-          name: user.name,
-          googleId: user.id,
-        }),
-      });
+      const response = await api.googleAuth(user.email, user.name, user.id);
 
       const data = await response.json();
 
@@ -146,20 +127,7 @@ export default function Login() {
         : null;
 
       // Send Apple user info to backend
-      const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-      
-      const response = await fetch(`${API_BASE_URL}/apple-auth`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          appleId: appleId, // Always send the Apple user ID (required)
-          email: email, // Optional, may be null on subsequent sign-ins
-          name: name,
-          identityToken: credential.identityToken, // Optional: for verification
-        }),
-      });
+      const response = await api.appleAuth(appleId, email, name, credential.identityToken);
 
       const data = await response.json();
 
