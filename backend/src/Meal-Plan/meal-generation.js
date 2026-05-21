@@ -36,15 +36,56 @@ async function copyNextMealPlanToMealPlan() {
     console.log("=== Finished copying nextMealPlan ===\n");
 }
 
+async function setUnavailableMealPlans(allUsers, meals) {
+    const unavailableCard = {
+        Meal_Option: "No Recommendations Available",
+        Description: "Meal recommendations are currently unavailable. Please try again later.",
+        Entrees: []
+    };
+
+    const unavailablePlan = {};
+    for (const meal of meals) {
+        unavailablePlan[meal] = {
+            Yahentamitisi_Dining_Hall: [unavailableCard],
+            South_Campus_Dining_Hall: [unavailableCard],
+            North_251_Dining_Hall: [unavailableCard]
+        };
+    }
+
+    for (const user of allUsers) {
+        try {
+            await prisma.user.update({
+                where: { username: user.username },
+                data: { nextMealPlan: unavailablePlan, mealPlanPopulated: true }
+            });
+            console.log(`✓ Set unavailable plan for ${user.username}`);
+        } catch (error) {
+            console.error(`Error setting unavailable plan for ${user.username}:`, error);
+        }
+    }
+}
+
 async function main() {
     // First, copy data from nextMealPlan to mealPlan
     await copyNextMealPlanToMealPlan();
-    
+
     const today = new Date();
     const dayOfWeek = (today.getDay() + 1) % 7;
     const meals = (dayOfWeek === 0 || dayOfWeek === 6) ? ["Brunch", "Dinner"] : ["Breakfast", "Lunch", "Dinner"];
 
     const allUsers = await prisma.user.findMany();
+
+    if (allUsers.length === 0) {
+        console.log("No users found, skipping meal generation.");
+        return;
+    }
+
+    const menuCount = await prisma.uMD_Dining2.count();
+    if (menuCount === 0) {
+        console.warn("UMD_Dining2 database is empty. Setting unavailable meal plans.");
+        await setUnavailableMealPlans(allUsers, meals);
+        return;
+    }
 
     const system_prompt = "You are a expert dietition that can gives users meal recommendations based on their dietary preferences and goals."
 
@@ -192,25 +233,31 @@ async function main() {
         }
     }
 
-    const batchInput = batchData.map(obj => JSON.stringify(obj)).join("\n") + "\n"; 
+    const batchInput = batchData.map(obj => JSON.stringify(obj)).join("\n") + "\n";
 
-    fs.writeFileSync("batchinput.jsonl", batchInput, "utf8"); 
+    fs.writeFileSync("batchinput.jsonl", batchInput, "utf8");
 
-    const file = await openai.files.create({
-        file: fs.createReadStream("batchinput.jsonl"),
-        purpose: "batch"
-    })
+    try {
+        const file = await openai.files.create({
+            file: fs.createReadStream("batchinput.jsonl"),
+            purpose: "batch"
+        });
 
-    const batch = await openai.batches.create({input_file_id: file.id, endpoint: "/v1/responses", completion_window: "24h"})
-    
-    console.log(`Batch created with ID: ${batch.id}`);
-    
-    // Check batch status and retrieve results when completed
-    const mealPlansByUser = await checkBatchStatusAndRetrieveResults(openai, batch.id);
-    
-    // Save meal plans to database
-    if (mealPlansByUser) {
-        await saveMealPlansToDatabase(mealPlansByUser);
+        const batch = await openai.batches.create({input_file_id: file.id, endpoint: "/v1/responses", completion_window: "24h"});
+
+        console.log(`Batch created with ID: ${batch.id}`);
+
+        const mealPlansByUser = await checkBatchStatusAndRetrieveResults(openai, batch.id);
+
+        if (mealPlansByUser) {
+            await saveMealPlansToDatabase(mealPlansByUser);
+        } else {
+            console.warn("Batch returned no results. Setting unavailable meal plans.");
+            await setUnavailableMealPlans(allUsers, meals);
+        }
+    } catch (error) {
+        console.error("OpenAI API error:", error.message || error);
+        await setUnavailableMealPlans(allUsers, meals);
     }
 }
 
