@@ -1,4 +1,3 @@
-// app/index.tsx
 import { View, Text, ScrollView, ActivityIndicator, Platform, Linking, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
@@ -8,12 +7,6 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import * as AppleAuthentication from 'expo-apple-authentication';
 import '../global.css';
 import { api } from '../lib/api';
-
-// Configure Google Sign-In
-GoogleSignin.configure({
-  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-});
 
 export default function Index() {
   const router = useRouter();
@@ -26,16 +19,12 @@ export default function Index() {
     checkAuthStatus();
   }, []);
 
-  // Helper function to check if onboarding is complete
   async function checkOnboardingComplete(): Promise<boolean> {
     try {
       const response = await api.getUserProfile();
-
       if (response.ok) {
         const profile = await response.json();
-
-        // Check if all required onboarding fields are present
-        const isOnboardingComplete =
+        return (
           profile.gender !== null &&
           profile.frequency !== null &&
           profile.height !== null &&
@@ -43,13 +32,11 @@ export default function Index() {
           profile.age !== null &&
           profile.goal !== null &&
           profile.diet !== null &&
-          profile.other !== null; // other can be empty string, but must not be null
-
-        return isOnboardingComplete;
+          profile.other !== null
+        );
       }
       return false;
-    } catch (err) {
-      console.error("Error checking onboarding status:", err);
+    } catch {
       return false;
     }
   }
@@ -57,71 +44,58 @@ export default function Index() {
   async function checkAuthStatus() {
     try {
       const token = await AsyncStorage.getItem("token");
-      
+
       if (token) {
-        // First, check if meal plan generation is in progress
         try {
           const statusResponse = await api.getGenerationStatus();
-
           if (statusResponse.ok) {
             const statusData = await statusResponse.json();
-            
-            // If generation is in progress, redirect to loading page
             if (statusData.inProgress) {
               router.replace("/loading" as any);
               return;
             }
           }
-        } catch (statusErr) {
-          console.error("Error checking generation status:", statusErr);
-          // Continue with other checks if generation status check fails
-        }
+        } catch {}
 
-        // Check if onboarding is complete by verifying required fields
         try {
           const response = await api.getUserProfile();
-
           if (response.ok) {
-            const profile = await response.json();
-            
-            // Check if all required onboarding fields are present
-            const isOnboardingComplete = 
-              profile.gender !== null &&
-              profile.frequency !== null &&
-              profile.height !== null &&
-              profile.weight !== null &&
-              profile.age !== null &&
-              profile.goal !== null &&
-              profile.diet !== null &&
-              profile.other !== null; // other can be empty string, but must not be null
-
-            if (isOnboardingComplete) {
-              // Onboarding complete, redirect to account
-              router.replace("/account" as any);
-            } else {
-              // Onboarding incomplete, redirect to start of onboarding
-              router.replace("/onboarding/gender" as any);
-            }
+            const isOnboardingComplete = await checkOnboardingComplete();
+            router.replace(isOnboardingComplete ? "/account" as any : "/onboarding/gender" as any);
           } else if (response.status === 401 || response.status === 403) {
             await AsyncStorage.removeItem("token");
-            await AsyncStorage.removeItem("supabase_session");
             setIsCheckingAuth(false);
           } else {
-            // Other error, still try to redirect to onboarding
             router.replace("/onboarding/gender" as any);
           }
-        } catch (err) {
-          console.error("Error checking profile:", err);
-          // On error, redirect to onboarding to be safe
+        } catch {
           router.replace("/onboarding/gender" as any);
         }
       } else {
-        // No token, show landing page
         setIsCheckingAuth(false);
       }
-    } catch (err) {
-      console.error("Error checking auth status:", err);
+    } catch {
       setIsCheckingAuth(false);
+    }
+  }
+
+  async function navigateAfterSignIn(isNewUser: boolean) {
+    try {
+      const statusResponse = await api.getGenerationStatus();
+      if (statusResponse.ok) {
+        const statusData = await statusResponse.json();
+        if (statusData.inProgress) {
+          router.replace("/loading" as any);
+          return;
+        }
+      }
+    } catch {}
+
+    if (isNewUser) {
+      router.push("/onboarding/gender");
+    } else {
+      const isOnboardingComplete = await checkOnboardingComplete();
+      router.replace(isOnboardingComplete ? "/account" as any : "/onboarding/gender" as any);
     }
   }
 
@@ -129,26 +103,16 @@ export default function Index() {
     try {
       setIsGoogleLoading(true);
       setError(null);
-      
-      // Check if Google Play Services are available (Android)
+
       await GoogleSignin.hasPlayServices();
-      
-      // Perform Google Sign-In
       const signInResult = await GoogleSignin.signIn();
-      
-      console.log('Google Sign-In Result:', JSON.stringify(signInResult, null, 2));
-      
-      // Try both possible structures for the user data
-      const user = signInResult.data?.user || (signInResult as any).user;
-      
-      if (!user?.email) {
-        console.log('User object:', user);
-        throw new Error('No email received from Google');
+
+      const idToken = signInResult.data?.idToken || (signInResult as any).idToken;
+      if (!idToken) {
+        throw new Error('No ID token received from Google');
       }
 
-      // Send Google user info to our backend
-      const response = await api.googleAuth(user.email, user.name, user.id);
-
+      const response = await api.googleAuth(idToken);
       const data = await response.json();
 
       if (!response.ok) {
@@ -156,47 +120,14 @@ export default function Index() {
         return;
       }
 
-      // Store our backend JWT token
       if (data.token) {
         await AsyncStorage.setItem('token', data.token);
       }
 
-      // Check if meal plan generation is in progress
-      try {
-        const statusResponse = await api.getGenerationStatus();
-
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json();
-
-          // If generation is in progress, redirect to loading page
-          if (statusData.inProgress) {
-            router.replace("/loading" as any);
-            return;
-          }
-        }
-      } catch (statusErr) {
-        console.error("Error checking generation status:", statusErr);
-        // Continue with normal flow if generation status check fails
-      }
-
-      // Navigate based on whether user is new or returning
-      if (data.isNewUser) {
-        // New user always goes to onboarding
-        router.push("/onboarding/gender");
-      } else {
-        // Returning user: check if onboarding is complete
-        const isOnboardingComplete = await checkOnboardingComplete();
-        if (isOnboardingComplete) {
-          router.replace("/account" as any);
-        } else {
-          router.replace("/onboarding/gender" as any);
-        }
-      }
+      await navigateAfterSignIn(data.isNewUser);
     } catch (error: any) {
-      console.log('Google Sign-In Error:', error);
-      
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // User cancelled the sign-in flow - no error message needed
+        // user cancelled — no message needed
       } else if (error.code === statusCodes.IN_PROGRESS) {
         setError('Sign-in is already in progress');
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
@@ -213,14 +144,12 @@ export default function Index() {
     try {
       setIsAppleLoading(true);
       setError(null);
-      
-      // Check if Apple Sign-In is available (iOS 13+)
-      if (!AppleAuthentication.isAvailableAsync()) {
+
+      if (!await AppleAuthentication.isAvailableAsync()) {
         setError('Apple Sign-In is not available on this device');
         return;
       }
 
-      // Perform Apple Sign-In
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -228,19 +157,11 @@ export default function Index() {
         ],
       });
 
-      console.log('Apple Sign-In Result:', JSON.stringify(credential, null, 2));
-
-      // Always use Apple user ID as the primary identifier
-      // credential.user is consistent across sign-ins, even with "Hide My Email"
-      const appleId = credential.user;
-      const email = credential.email; // May be null on subsequent sign-ins, that's okay
-      const name = credential.fullName 
+      const name = credential.fullName
         ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
         : null;
 
-      // Send Apple user info to backend
-      const response = await api.appleAuth(appleId, email, name, credential.identityToken);
-
+      const response = await api.appleAuth(credential.user, credential.email, name, credential.identityToken);
       const data = await response.json();
 
       if (!response.ok) {
@@ -248,47 +169,14 @@ export default function Index() {
         return;
       }
 
-      // Store backend JWT token
       if (data.token) {
         await AsyncStorage.setItem('token', data.token);
       }
 
-      // Check if meal plan generation is in progress
-      try {
-        const statusResponse = await api.getGenerationStatus();
-
-        if (statusResponse.ok) {
-          const statusData = await statusResponse.json();
-
-          // If generation is in progress, redirect to loading page
-          if (statusData.inProgress) {
-            router.replace("/loading" as any);
-            return;
-          }
-        }
-      } catch (statusErr) {
-        console.error("Error checking generation status:", statusErr);
-        // Continue with normal flow if generation status check fails
-      }
-
-      // Navigate based on whether user is new or returning
-      if (data.isNewUser) {
-        // New user always goes to onboarding
-        router.push("/onboarding/gender");
-      } else {
-        // Returning user: check if onboarding is complete
-        const isOnboardingComplete = await checkOnboardingComplete();
-        if (isOnboardingComplete) {
-          router.replace("/account" as any);
-        } else {
-          router.replace("/onboarding/gender" as any);
-        }
-      }
+      await navigateAfterSignIn(data.isNewUser);
     } catch (error: any) {
-      console.log('Apple Sign-In Error:', error);
-      
       if (error.code === 'ERR_CANCELED') {
-        // User cancelled - no error message needed
+        // user cancelled — no message needed
       } else {
         setError(error.message || 'Apple sign-in failed. Please try again.');
       }
@@ -297,7 +185,6 @@ export default function Index() {
     }
   };
 
-  // Show loading spinner while checking auth status
   if (isCheckingAuth) {
     return (
       <View className="flex-1 bg-white items-center justify-center">
@@ -307,7 +194,7 @@ export default function Index() {
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-gradient-to-b from-blue-50 to-white"
       showsVerticalScrollIndicator={true}
       indicatorStyle="black"
@@ -321,14 +208,14 @@ export default function Index() {
             </Text>
             <View className="h-1 w-20 bg-blue-600 mx-auto rounded-full" />
           </View>
-          
+
           <Text className="text-xl text-gray-600 text-center mb-1 px-4 leading-relaxed max-w-md">
             Get personalized daily meal plans and keep track of macros to achieve your goals
           </Text>
         </View>
 
         {/* Features Cards */}
-        <View className="w-full mb-12 gap-4 ">
+        <View className="w-full mb-12 gap-4">
           <View className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100">
             <View className="flex-row items-center gap-4">
               <View className="w-12 h-12 bg-blue-100 rounded-xl items-center justify-center">
@@ -360,7 +247,6 @@ export default function Index() {
               </View>
             </View>
           </View>
-
         </View>
 
         {/* Error Message */}
@@ -373,7 +259,7 @@ export default function Index() {
         {/* Apple Sign-In Button (iOS only) */}
         {Platform.OS === 'ios' && (
           <View className="w-full mb-3">
-            <TouchableOpacity 
+            <TouchableOpacity
               className="w-full bg-black py-5 px-6 rounded-2xl flex-row items-center justify-center shadow-lg"
               onPress={handleAppleSignIn}
               disabled={isAppleLoading}
@@ -399,7 +285,7 @@ export default function Index() {
 
         {/* Google Sign-In Button */}
         <View className="w-full mb-4">
-          <TouchableOpacity 
+          <TouchableOpacity
             className="w-full bg-white py-5 px-6 rounded-2xl flex-row items-center justify-center shadow-lg border border-gray-200"
             onPress={handleGoogleSignIn}
             disabled={isGoogleLoading}
@@ -426,14 +312,14 @@ export default function Index() {
         <View className="mt-6 items-center px-4">
           <Text className="text-sm text-gray-500 text-center">
             By continuing, you agree to our{' '}
-            <Text 
+            <Text
               className="underline"
               onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/privacy-policy')}
             >
               Privacy Policy
             </Text>
             {' '}and{' '}
-            <Text 
+            <Text
               className="underline"
               onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/terms-of-service')}
             >
