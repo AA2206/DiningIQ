@@ -51,18 +51,12 @@ export default function Login() {
       // Perform Google Sign-In
       const signInResult = await GoogleSignin.signIn();
       
-      console.log('Google Sign-In Result:', JSON.stringify(signInResult, null, 2));
-      
-      // Try both possible structures for the user data
-      const user = signInResult.data?.user || (signInResult as any).user;
-      
-      if (!user?.email) {
-        console.log('User object:', user);
-        throw new Error('No email received from Google');
+      const idToken = signInResult.data?.idToken || (signInResult as any).idToken;
+      if (!idToken) {
+        throw new Error('No ID token received from Google');
       }
 
-      // Send Google user info to our backend
-      const response = await api.googleAuth(user.email, user.name, user.id);
+      const response = await api.googleAuth(idToken);
 
       const data = await response.json();
 
