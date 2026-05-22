@@ -1,4 +1,5 @@
 import express, { type Request, type Response } from 'express';
+import { toInputJson } from '../lib/json';
 import { prisma } from '../lib/prisma';
 import { authenticateJWT } from '../middleware/auth';
 import { generateMealPlanForUser, modifyMealPlan } from '../services/mealPlanService';
@@ -75,7 +76,7 @@ mealPlanRouter.post('/generate-meal-plan', authenticateJWT, async (req: Request,
 
     await prisma.user.update({
       where: { username },
-      data: { mealPlan, mealPlanGenerating: false },
+      data: { mealPlan: toInputJson(mealPlan), mealPlanGenerating: false },
     });
 
     return res.status(200).json({ message: 'Meal plan generated successfully', mealPlan });
@@ -104,7 +105,7 @@ mealPlanRouter.post('/modify-meal-plan', authenticateJWT, async (req: Request, r
     if (!user.mealPlan) return res.status(404).json({ error: 'No meal plan found. Please generate a meal plan first.' });
 
     const modifiedMealPlan = await modifyMealPlan(user_query, user.mealPlan);
-    await prisma.user.update({ where: { username }, data: { mealPlan: modifiedMealPlan } });
+    await prisma.user.update({ where: { username }, data: { mealPlan: toInputJson(modifiedMealPlan) } });
 
     return res.status(200).json({ message: 'Meal plan updated successfully', mealPlan: modifiedMealPlan });
   } catch (error) {

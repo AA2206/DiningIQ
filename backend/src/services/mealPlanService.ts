@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
+import { toInputJson } from '../lib/json';
 import { prisma } from '../lib/prisma';
 import { getMealFilter } from '../lib/mealFilter';
 
@@ -94,7 +95,11 @@ export async function generateMealPlanForUser(username: string) {
 
   await prisma.user.update({
     where: { username },
-    data: { mealPlan: mealPlans, nextMealPlan: mealPlans2, mealPlanPopulated: false },
+    data: {
+      mealPlan: toInputJson(mealPlans),
+      nextMealPlan: toInputJson(mealPlans2),
+      mealPlanPopulated: false,
+    },
   });
 
   return mealPlans;
