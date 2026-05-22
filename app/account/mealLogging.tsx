@@ -553,12 +553,11 @@ export default function MealLogging() {
           statusText: response.statusText,
           error: errorData.error || errorData,
         });
-        // TODO: Show error message to user
+        Alert.alert("Error", errorData.error || "Failed to remove meal. Please try again.");
       }
     } catch (err: any) {
       console.error("Error removing meal:", err);
-      console.error("Error details:", err.message, err.stack);
-      // TODO: Show error message to user
+      Alert.alert("Error", "Something went wrong. Please check your connection and try again.");
     }
   }
 
@@ -589,11 +588,11 @@ export default function MealLogging() {
           status: response.status,
           error: errorData.error || errorData,
         });
-        // TODO: Show error message to user
+        Alert.alert("Error", errorData.error || "Failed to update serving size. Please try again.");
       }
     } catch (err: any) {
       console.error("Error increasing serving size:", err);
-      // TODO: Show error message to user
+      Alert.alert("Error", "Something went wrong. Please check your connection and try again.");
     }
   }
 
@@ -630,11 +629,11 @@ export default function MealLogging() {
           status: response.status,
           error: errorData.error || errorData,
         });
-        // TODO: Show error message to user
+        Alert.alert("Error", errorData.error || "Failed to update serving size. Please try again.");
       }
     } catch (err: any) {
       console.error("Error decreasing serving size:", err);
-      // TODO: Show error message to user
+      Alert.alert("Error", "Something went wrong. Please check your connection and try again.");
     }
   }
 
@@ -773,8 +772,7 @@ export default function MealLogging() {
         // EDIT MODE: Update existing meal
         // Check if meal is on accessible date
         if (!isDateAccessible(editingMeal.date)) {
-          console.error("Cannot edit meal: not on accessible date");
-          // TODO: Show error message to user
+          Alert.alert("Error", "This meal can no longer be edited.");
           return;
         }
 
@@ -820,7 +818,7 @@ export default function MealLogging() {
         } else {
           const errorData = await response.json();
           console.error("Failed to update meal:", errorData.error);
-          // TODO: Show error message to user
+          Alert.alert("Error", errorData.error || "Failed to update meal. Please try again.");
         }
       } else {
         // ADD MODE: Create new meal
@@ -872,12 +870,12 @@ export default function MealLogging() {
         } else {
           const errorData = await response.json();
           console.error("Failed to add meal:", errorData.error);
-          // TODO: Show error message to user
+          Alert.alert("Error", errorData.error || "Failed to add meal. Please try again.");
         }
       }
     } catch (err: any) {
       console.error("Error submitting meal:", err);
-      // TODO: Show error message to user
+      Alert.alert("Error", "Something went wrong. Please check your connection and try again.");
     }
   }
 
