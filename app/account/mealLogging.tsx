@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import MealCard from '../../components/MealCard';
 import '../../global.css';
+import { api } from '../../lib/api';
 
 // Interface for Entree
 interface Entree {
@@ -87,9 +87,6 @@ export default function MealLogging() {
   const [copyError, setCopyError] = useState<string | null>(null);
   const [availableMealTypes, setAvailableMealTypes] = useState<string[]>([]);
 
-  // API Base URL
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
   // Dining Hall Options
   const DINING_HALLS = ["South Campus", "Yahentamitsi Dining Hall", "251 North"];
 
@@ -151,27 +148,7 @@ export default function MealLogging() {
   // Function to fetch meals for a given date
   async function fetchMeals(date: Date) {
     try {
-      // Get authentication token
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
-      // Convert date to ISO string for API
-      const dateISO = date.toISOString();
-
-      // Make API call
-      const response = await fetch(
-        `${API_BASE_URL}/fetch-meals?date=${encodeURIComponent(dateISO)}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.fetchMeals(date.toISOString());
 
       if (response.ok) {
         const data = await response.json();
@@ -441,28 +418,8 @@ export default function MealLogging() {
     setCopyError(null);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        setCopyError("Not authenticated");
-        setVerifyingCopy(false);
-        return;
-      }
-
-      // Extract entree names (not IDs)
       const entreeNames = mealToCopy.entrees.map(e => e.entree);
-      
-      const response = await fetch(`${API_BASE_URL}/verify-entrees`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          entreeNames, 
-          mealType,
-          diningHall: mealToCopy.diningHall 
-        }),
-      });
+      const response = await api.verifyEntrees(entreeNames, mealType, mealToCopy.diningHall);
 
       const data = await response.json();
 
@@ -485,11 +442,6 @@ export default function MealLogging() {
 
     try {
       setCopyingMeal(true);
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
 
       // Determine target date: effective date if meal is from past, same date if from effective date
       const effectiveDate = getEffectiveDate();
@@ -506,20 +458,7 @@ export default function MealLogging() {
 
       // Look up current entree IDs by name for the selected meal type and dining hall
       const entreeNames = mealToCopy.entrees.map(e => e.entree);
-      
-      // First, get the current IDs for these entree names
-      const lookupResponse = await fetch(`${API_BASE_URL}/get-entrees-by-names`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          entreeNames,
-          mealType: selectedCopyMealType,
-          diningHall: mealToCopy.diningHall
-        }),
-      });
+      const lookupResponse = await api.getEntreesByNames(entreeNames, selectedCopyMealType, mealToCopy.diningHall);
 
       if (!lookupResponse.ok) {
         setCopyError("Failed to look up current menu items");
@@ -552,7 +491,7 @@ export default function MealLogging() {
       }
 
       // Copy with selected meal type
-      const payload = {
+      const response = await api.addMeal({
         mealName: mealToCopy.mealName,
         mealDescription: mealToCopy.mealDescription,
         mealType: selectedCopyMealType, // Use selected meal type, not original
@@ -560,15 +499,6 @@ export default function MealLogging() {
         diningHall: mealToCopy.diningHall,
         entrees: entrees,
         servingSize: mealToCopy.servingSize,
-      };
-
-      const response = await fetch(`${API_BASE_URL}/add-meal`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -602,26 +532,9 @@ export default function MealLogging() {
   // Handle removing a meal from the appropriate hashmap and backend
   async function handleRemoveMeal(mealType: string, mealId: number, mealName: string) {
     try {
-      // Get authentication token
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
       console.log("Attempting to remove meal:", { mealId, mealName, mealType });
 
-      // Call backend API to remove meal
-      const response = await fetch(`${API_BASE_URL}/remove-meal`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          mealId: mealId,
-        }),
-      });
+      const response = await api.removeMeal(mealId);
 
       console.log("Remove meal response status:", response.status);
 
@@ -652,24 +565,7 @@ export default function MealLogging() {
   // Handle increasing serving size
   async function handleIncreaseServing(mealType: string, mealId: number, mealName: string) {
     try {
-      // Get authentication token
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
-      // Call backend API to increase serving size
-      const response = await fetch(`${API_BASE_URL}/increase-serving`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          mealId: mealId,
-        }),
-      });
+      const response = await api.increaseServing(mealId);
 
       if (response.ok) {
         const result = await response.json();
@@ -714,24 +610,7 @@ export default function MealLogging() {
     }
 
     try {
-      // Get authentication token
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
-      // Call backend API to decrease serving size
-      const response = await fetch(`${API_BASE_URL}/decrease-serving`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          mealId: mealId,
-        }),
-      });
+      const response = await api.decreaseServing(mealId);
 
       if (response.ok) {
         const result = await response.json();
@@ -765,22 +644,7 @@ export default function MealLogging() {
 
     setFetchingEntrees(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
-      const response = await fetch(
-        `${API_BASE_URL}/fetchAllEntrees?diningHall=${encodeURIComponent(diningHall)}&mealType=${encodeURIComponent(modalMealType)}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.fetchAllEntrees(diningHall, modalMealType);
 
       if (response.ok) {
         const data = await response.json();
@@ -869,13 +733,6 @@ export default function MealLogging() {
     }
 
     try {
-      // Get authentication token
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.error("Not authenticated");
-        return;
-      }
-
       // Convert selectedEntrees Map to array of objects with id and servingSize
       const entrees = Array.from(selectedEntrees.entries()).map(([entreeId, servingSize]) => ({
         id: entreeId,
@@ -921,20 +778,11 @@ export default function MealLogging() {
           return;
         }
 
-        const requestBody = {
+        const response = await api.updateMeal({
           mealId: editingMeal.id,
           mealName: mealName.trim(),
           mealDescription: mealDescription.trim() || "",
           entrees: entrees,
-        };
-
-        const response = await fetch(`${API_BASE_URL}/update-meal`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestBody),
         });
 
         if (response.ok) {
@@ -984,23 +832,14 @@ export default function MealLogging() {
           return;
         }
         
-        const requestBody = {
+        const response = await api.addMeal({
           mealName: mealName.trim(),
           mealDescription: mealDescription.trim() || "",
           mealType: modalMealType,
           date: effectiveDate.toISOString(),
           diningHall: diningHall,
           entrees: entrees,
-          servingSize: 1, // Overall meal serving size (default 1)
-        };
-
-        const response = await fetch(`${API_BASE_URL}/add-meal`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestBody),
+          servingSize: 1,
         });
 
         if (response.ok) {

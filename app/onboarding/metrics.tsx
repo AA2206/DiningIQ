@@ -2,8 +2,8 @@
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import '../../global.css';
+import { api } from '../../lib/api';
 
 export default function Metrics() {
   const router = useRouter();
@@ -12,8 +12,6 @@ export default function Metrics() {
   const [age, setAge] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
   async function handleSubmit() {
     if (!height || !weight || !age) {
@@ -25,21 +23,7 @@ export default function Metrics() {
     setError("");
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Not authenticated. Please login again.");
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/add-metrics`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ height, weight, age }),
-      });
+      const response = await api.addMetrics(height, weight, age);
 
       if (response.ok) {
         router.push("/onboarding/goal" as any);

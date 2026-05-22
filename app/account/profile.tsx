@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import '../../global.css';
+import { api } from '../../lib/api';
 
 interface UserProfile {
   username: string;
@@ -130,25 +131,13 @@ export default function Profile() {
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
   useEffect(() => {
     fetchProfile();
   }, []);
 
   async function fetchProfile() {
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        router.replace("/" as any);
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/user-profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.getUserProfile();
 
       if (response.ok) {
         const data = await response.json();
@@ -165,52 +154,22 @@ export default function Profile() {
 
   async function updateField(field: string, value: string) {
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return;
-
-      // For metrics fields, use add-metrics endpoint
       if (['height', 'weight', 'age'].includes(field)) {
-        const response = await fetch(`${API_BASE_URL}/add-metrics`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            height: field === 'height' ? value : profile?.height ?? 0,
-            weight: field === 'weight' ? value : profile?.weight ?? 0,
-            age: field === 'age' ? value : profile?.age ?? 0,
-          }),
-        });
-
+        const response = await api.addMetrics(
+          field === 'height' ? value : profile?.height ?? 0,
+          field === 'weight' ? value : profile?.weight ?? 0,
+          field === 'age' ? value : profile?.age ?? 0,
+        );
         if (response.ok) {
           setProfile(prev => prev ? { ...prev, [field]: parseFloat(value) } : null);
         }
       } else if (field === 'other') {
-        // Use the /other endpoint
-        const response = await fetch(`${API_BASE_URL}/other`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ other: value }),
-        });
-
+        const response = await api.updateOther(value);
         if (response.ok) {
           setProfile(prev => prev ? { ...prev, other: value } : null);
         }
       } else {
-        // Use update-field for other fields
-        const response = await fetch(`${API_BASE_URL}/update-field`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ field, selectedValue: value }),
-        });
-
+        const response = await api.updateField(field, value);
         if (response.ok) {
           setProfile(prev => prev ? { ...prev, [field]: value } : null);
         }
@@ -242,19 +201,7 @@ export default function Profile() {
   async function handleDeleteAccount() {
     setIsDeleting(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        setError("Not authenticated");
-        setIsDeleting(false);
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/delete-account`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.deleteAccount();
 
       // Always clear token and all local storage, regardless of response
       // This ensures the user is logged out even if there's a network error

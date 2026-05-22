@@ -2,9 +2,9 @@
 import { View, Text, ScrollView, ActivityIndicator, Dimensions, FlatList, Alert } from "react-native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import MealOptionCard from '../../components/MealOptionCard';
 import '../../global.css';
+import { api } from '../../lib/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 48;
@@ -35,29 +35,13 @@ export default function MealPlan() {
   const [error, setError] = useState("");
   const [addingMealKey, setAddingMealKey] = useState<string | null>(null);
 
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
   useEffect(() => {
     fetchMealPlan();
   }, []);
 
   async function fetchMealPlan() {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Not authenticated. Please login again.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/get-meal-plan`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.getMealPlan();
 
       if (response.ok) {
         const data = await response.json();
@@ -135,12 +119,6 @@ export default function MealPlan() {
   ) {
     try {
       setAddingMealKey(uniqueKey);
-      
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert("Error", "Not authenticated. Please login again.");
-        return;
-      }
 
       const entrees = mealOption.Entrees.map((entree) => ({
         id: entree.id,
@@ -152,14 +130,14 @@ export default function MealPlan() {
 
       // Use effective date instead of current date
       const targetDate = getEffectiveDate();
-      
+
       if (!targetDate) {
         Alert.alert("Error", "Cannot add meals during 3-4:30 AM EST window. Please try again after 4:30 AM EST.");
         setAddingMealKey(null);
         return;
       }
 
-      const payload = {
+      const response = await api.addMeal({
         mealName: mealOption.Meal_Option,
         mealDescription: mealOption.Description,
         mealType: targetMealType, // Brunch → Lunch, others stay the same
@@ -167,15 +145,6 @@ export default function MealPlan() {
         diningHall: formatDiningHallName(diningHall),
         entrees: entrees,
         servingSize: 1,
-      };
-
-      const response = await fetch(`${API_BASE_URL}/add-meal`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
       });
 
       if (response.ok) {

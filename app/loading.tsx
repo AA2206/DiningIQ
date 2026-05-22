@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import '../global.css';
+import { api } from '../lib/api';
 
 const PROGRESS_BAR_WIDTH = 256; // w-64 = 256px
 
@@ -17,8 +18,6 @@ export default function Loading() {
   const pollIntervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
-
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
   useEffect(() => {
     checkStatusAndGenerate();
@@ -99,12 +98,7 @@ export default function Loading() {
       }
 
       // First, check generation status
-      const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const statusResponse = await api.getGenerationStatus();
 
       if (!statusResponse.ok) {
         throw new Error("Failed to check generation status");
@@ -128,14 +122,14 @@ export default function Loading() {
         setStatus("Resuming meal plan generation...");
         startProgressAnimation(statusData.startedAt);
         // Poll for completion
-        pollForCompletion(token);
+        pollForCompletion();
         return;
       }
 
       // No generation in progress, start new generation
       setStatus("Starting meal plan generation...");
       startProgressAnimation();
-      await generateMealPlan(token);
+      await generateMealPlan();
     } catch (err: any) {
       console.error("Error:", err);
       clearAllIntervals();
@@ -146,16 +140,11 @@ export default function Loading() {
     }
   }
 
-  async function pollForCompletion(token: string) {
+  async function pollForCompletion() {
     // Poll every 3 seconds for completion
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const statusResponse = await fetch(`${API_BASE_URL}/generation-status`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const statusResponse = await api.getGenerationStatus();
 
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
@@ -185,15 +174,9 @@ export default function Loading() {
     }, 3000); // Poll every 3 seconds
   }
 
-  async function generateMealPlan(token: string) {
+  async function generateMealPlan() {
     try {
-      const response = await fetch(`${API_BASE_URL}/generate-meal-plan`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.generateMealPlan();
 
       clearAllIntervals();
 
@@ -216,7 +199,7 @@ export default function Loading() {
         if (data.startedAt) {
           startProgressAnimation(data.startedAt);
         }
-        pollForCompletion(token);
+        pollForCompletion();
       } else {
         const data = await response.json();
         setError(data.error || "Failed to generate meal plan");
