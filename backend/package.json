@@ -15,7 +15,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@ai-sdk/google": "^2.0.29",
     "@google/genai": "^1.35.0",
