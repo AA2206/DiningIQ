@@ -1,5 +1,11 @@
 import { Stack } from 'expo-router';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import '../global.css';
+
+GoogleSignin.configure({
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+});
 
 export default function RootLayout() {
   return (
