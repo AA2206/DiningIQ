@@ -17,17 +17,11 @@ async function apiFetch(path: string, options: RequestInit = {}) {
 export const api = {
   // ── Auth (no token required) ─────────────────────────────────────────────
 
-  login: (username: string, password: string) =>
-    apiFetch("/login", { method: "POST", body: JSON.stringify({ username, password }) }),
-
-  register: (username: string, password: string) =>
-    apiFetch("/register", { method: "POST", body: JSON.stringify({ username, password }) }),
-
   googleAuth: (idToken: string) =>
     apiFetch("/google-auth", { method: "POST", body: JSON.stringify({ idToken }) }),
 
-  appleAuth: (appleId: string, email: string | null, name: string | null, identityToken: string | null) =>
-    apiFetch("/apple-auth", { method: "POST", body: JSON.stringify({ appleId, email, name, identityToken }) }),
+  appleAuth: (identityToken: string) =>
+    apiFetch("/apple-auth", { method: "POST", body: JSON.stringify({ identityToken }) }),
 
   // ── User ─────────────────────────────────────────────────────────────────
 

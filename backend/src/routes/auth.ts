@@ -10,6 +10,14 @@ export const authRouter = express.Router();
 
 const googleClient = new OAuth2Client();
 
+/** Audiences for Google ID tokens — iOS client and web client (Android uses web). */
+function getGoogleTokenAudiences(): string[] {
+  return [
+    process.env.GOOGLE_IOS_CLIENT_ID,
+    process.env.GOOGLE_WEB_CLIENT_ID,
+  ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+}
+
 // POST /register
 authRouter.post('/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -81,12 +89,15 @@ authRouter.post('/google-auth', async (req: Request, res: Response) => {
   }
 
   try {
+    const audiences = getGoogleTokenAudiences();
+    if (audiences.length === 0) {
+      console.error('Google OAuth client IDs are not configured on the server');
+      return res.status(500).json({ error: 'Google sign-in is not configured' });
+    }
+
     const ticket = await googleClient.verifyIdToken({
       idToken,
-      audience: [
-        process.env.GOOGLE_IOS_CLIENT_ID!,
-        process.env.GOOGLE_WEB_CLIENT_ID!,
-      ].filter(Boolean),
+      audience: audiences,
     });
 
     const payload = ticket.getPayload();

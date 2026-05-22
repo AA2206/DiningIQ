@@ -9,7 +9,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import '../global.css';
 import { api } from '../lib/api';
 
-// Configure Google Sign-In
+// Configure Google Sign-In (webClientId is required on Android)
 GoogleSignin.configure({
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -129,25 +129,23 @@ export default function Index() {
     try {
       setIsGoogleLoading(true);
       setError(null);
-      
-      // Check if Google Play Services are available (Android)
-      await GoogleSignin.hasPlayServices();
-      
-      // Perform Google Sign-In
-      const signInResult = await GoogleSignin.signIn();
-      
-      console.log('Google Sign-In Result:', JSON.stringify(signInResult, null, 2));
-      
-      // Try both possible structures for the user data
-      const user = signInResult.data?.user || (signInResult as any).user;
-      
-      if (!user?.email) {
-        console.log('User object:', user);
-        throw new Error('No email received from Google');
+
+      if (Platform.OS === 'android' && !process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID) {
+        setError('Google Sign-In is not configured for Android (missing web client ID).');
+        return;
       }
 
-      // Send Google user info to our backend
-      const response = await api.googleAuth(user.email, user.name, user.id);
+      // Check if Google Play Services are available (Android)
+      await GoogleSignin.hasPlayServices();
+
+      const signInResult = await GoogleSignin.signIn();
+
+      const idToken = signInResult.data?.idToken || (signInResult as any).idToken;
+      if (!idToken) {
+        throw new Error('No ID token received from Google');
+      }
+
+      const response = await api.googleAuth(idToken);
 
       const data = await response.json();
 
@@ -193,8 +191,6 @@ export default function Index() {
         }
       }
     } catch (error: any) {
-      console.log('Google Sign-In Error:', error);
-      
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // User cancelled the sign-in flow - no error message needed
       } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -228,18 +224,11 @@ export default function Index() {
         ],
       });
 
-      console.log('Apple Sign-In Result:', JSON.stringify(credential, null, 2));
+      if (!credential.identityToken) {
+        throw new Error('No identity token received from Apple');
+      }
 
-      // Always use Apple user ID as the primary identifier
-      // credential.user is consistent across sign-ins, even with "Hide My Email"
-      const appleId = credential.user;
-      const email = credential.email; // May be null on subsequent sign-ins, that's okay
-      const name = credential.fullName 
-        ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
-        : null;
-
-      // Send Apple user info to backend
-      const response = await api.appleAuth(appleId, email, name, credential.identityToken);
+      const response = await api.appleAuth(credential.identityToken);
 
       const data = await response.json();
 
@@ -285,8 +274,6 @@ export default function Index() {
         }
       }
     } catch (error: any) {
-      console.log('Apple Sign-In Error:', error);
-      
       if (error.code === 'ERR_CANCELED') {
         // User cancelled - no error message needed
       } else {

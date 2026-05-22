@@ -90,9 +90,9 @@ export default function Loading() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setError("Not authenticated. Please login again.");
+        setError("Not authenticated. Please sign in again.");
         setTimeout(() => {
-          router.push("/login" as any);
+          router.replace("/" as any);
         }, 2000);
         return;
       }
