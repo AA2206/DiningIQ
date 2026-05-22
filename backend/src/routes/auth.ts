@@ -2,9 +2,13 @@ import express, { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import appleSignin from 'apple-signin-auth';
 import { prisma } from '../lib/prisma';
 
 export const authRouter = express.Router();
+
+const googleClient = new OAuth2Client();
 
 // POST /register
 authRouter.post('/register', async (req: Request, res: Response) => {
@@ -70,13 +74,27 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
 // POST /google-auth
 authRouter.post('/google-auth', async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { idToken } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+  if (!idToken) {
+    return res.status(400).json({ error: 'ID token is required' });
   }
 
   try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: [
+        process.env.GOOGLE_IOS_CLIENT_ID!,
+        process.env.GOOGLE_WEB_CLIENT_ID!,
+      ].filter(Boolean),
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload?.email) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const email = payload.email;
     let user = await prisma.user.findUnique({ where: { username: email } });
     let isNewUser = false;
 
@@ -95,19 +113,28 @@ authRouter.post('/google-auth', async (req: Request, res: Response) => {
     return res.status(200).json({ token, userId: user.id, isNewUser });
   } catch (err) {
     console.error('Google auth error:', err);
-    return res.status(500).json({ error: 'Internal server error.' });
+    return res.status(401).json({ error: 'Invalid Google token' });
   }
 });
 
 // POST /apple-auth
 authRouter.post('/apple-auth', async (req: Request, res: Response) => {
-  const { appleId } = req.body;
+  const { identityToken } = req.body;
 
-  if (!appleId) {
-    return res.status(400).json({ error: 'Apple ID is required' });
+  if (!identityToken) {
+    return res.status(400).json({ error: 'Identity token is required' });
   }
 
   try {
+    const claims = await appleSignin.verifyIdToken(identityToken, {
+      audience: process.env.APPLE_BUNDLE_ID || 'com.dietiq.app',
+    });
+
+    const appleId = claims.sub;
+    if (!appleId) {
+      return res.status(401).json({ error: 'Invalid Apple token' });
+    }
+
     const username = `apple_${appleId}`;
     let user = await prisma.user.findUnique({ where: { username } });
     let isNewUser = false;
@@ -127,6 +154,6 @@ authRouter.post('/apple-auth', async (req: Request, res: Response) => {
     return res.status(200).json({ token, userId: user.id, isNewUser });
   } catch (err) {
     console.error('Apple auth error:', err);
-    return res.status(500).json({ error: 'Internal server error.' });
+    return res.status(401).json({ error: 'Invalid Apple token' });
   }
 });

@@ -23,8 +23,8 @@ export const api = {
   register: (username: string, password: string) =>
     apiFetch("/register", { method: "POST", body: JSON.stringify({ username, password }) }),
 
-  googleAuth: (email: string, name: string | null, googleId: string) =>
-    apiFetch("/google-auth", { method: "POST", body: JSON.stringify({ email, name, googleId }) }),
+  googleAuth: (idToken: string) =>
+    apiFetch("/google-auth", { method: "POST", body: JSON.stringify({ idToken }) }),
 
   appleAuth: (appleId: string, email: string | null, name: string | null, identityToken: string | null) =>
     apiFetch("/apple-auth", { method: "POST", body: JSON.stringify({ appleId, email, name, identityToken }) }),
