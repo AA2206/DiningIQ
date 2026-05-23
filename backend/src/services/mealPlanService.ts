@@ -2,6 +2,11 @@ import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { toInputJson } from '../lib/json';
+import {
+  buildUnavailableDayPlan,
+  buildUnavailableMealSlot,
+  isQuotaOrRateLimitError,
+} from '../lib/mealPlanUnavailable';
 import { prisma } from '../lib/prisma';
 import { getMealFilter } from '../lib/mealFilter';
 
@@ -82,16 +87,10 @@ export async function generateMealPlanForUser(username: string) {
   const meals = dayOfWeek === 0 || dayOfWeek === 6 ? ['Brunch', 'Dinner'] : ['Breakfast', 'Lunch', 'Dinner'];
   const meals2 = tomorrowDayOfWeek === 0 || tomorrowDayOfWeek === 6 ? ['Brunch', 'Dinner'] : ['Breakfast', 'Lunch', 'Dinner'];
 
-  const [todayResults, tomorrowResults] = await Promise.all([
-    Promise.all(meals.map(meal => generateMealPlanResponse(user_query, meal, true))),
-    Promise.all(meals2.map(meal => generateMealPlanResponse(user_query, meal, false))),
+  const [mealPlans, mealPlans2] = await Promise.all([
+    generateDayMealPlans(user_query, meals, true, 'today'),
+    generateDayMealPlans(user_query, meals2, false, 'tomorrow'),
   ]);
-
-  const mealPlans: Record<string, any> = {};
-  meals.forEach((meal, i) => { mealPlans[meal] = todayResults[i]; });
-
-  const mealPlans2: Record<string, any> = {};
-  meals2.forEach((meal, i) => { mealPlans2[meal] = tomorrowResults[i]; });
 
   await prisma.user.update({
     where: { username },
@@ -105,15 +104,68 @@ export async function generateMealPlanForUser(username: string) {
   return mealPlans;
 }
 
+async function isDayMenuTableEmpty(today: boolean): Promise<boolean> {
+  const count = today ? await prisma.uMD_Dining.count() : await prisma.uMD_Dining2.count();
+  return count === 0;
+}
+
+/** Generate all meals for one day (UMD_Dining or UMD_Dining2). Falls back to placeholders per meal or whole day. */
+async function generateDayMealPlans(
+  user_query: string,
+  meals: string[],
+  today: boolean,
+  dayLabel: string
+): Promise<Record<string, unknown>> {
+  if (await isDayMenuTableEmpty(today)) {
+    console.warn(`[meal-plan] ${dayLabel}: menu table is empty — using unavailable placeholders for all meals.`);
+    return buildUnavailableDayPlan(meals);
+  }
+
+  const plan: Record<string, unknown> = {};
+
+  for (const meal of meals) {
+    try {
+      plan[meal] = await generateMealPlanResponse(user_query, meal, today);
+    } catch (error) {
+      console.error(`[meal-plan] ${dayLabel} ${meal} generation failed:`, error);
+
+      if (isQuotaOrRateLimitError(error)) {
+        console.warn(`[meal-plan] ${dayLabel}: quota/rate limit — using unavailable placeholders for all meals.`);
+        return buildUnavailableDayPlan(meals);
+      }
+
+      plan[meal] = buildUnavailableMealSlot();
+    }
+  }
+
+  return plan;
+}
+
 async function generateMealPlanResponse(user_query: string, meal_type: string, today: boolean) {
   const mealFilter = getMealFilter(meal_type);
 
-  const select = { id: true, entree: true, diningHall: true, meal: true, dietaryInformation: true, category: true, totalCalories: true, protein: true };
+  const select = {
+    id: true,
+    entree: true,
+    diningHall: true,
+    meal: true,
+    dietaryInformation: true,
+    category: true,
+    totalCalories: true,
+    protein: true,
+  };
   const where = { meal: mealFilter };
 
   const allMenuData = today
     ? await prisma.uMD_Dining.findMany({ select, where })
     : await prisma.uMD_Dining2.findMany({ select, where });
+
+  if (allMenuData.length === 0) {
+    console.warn(
+      `[meal-plan] No menu items for ${meal_type} (${today ? 'UMD_Dining' : 'UMD_Dining2'}) — using unavailable placeholder.`
+    );
+    return buildUnavailableMealSlot();
+  }
 
   const { object: mealPlan } = await generateObject({
     model: google('gemini-2.5-flash'),

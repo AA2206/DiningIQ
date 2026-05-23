@@ -24,12 +24,16 @@ interface MealOptionCardProps {
   isAdding?: boolean;
 }
 
+const UNAVAILABLE_MEAL_TITLE = 'No Recommendations Available';
+
 export default function MealOptionCard({ 
   mealOption, 
   diningHall,
   onAddMeal,
   isAdding 
 }: MealOptionCardProps) {
+  const isUnavailable = mealOption.Meal_Option === UNAVAILABLE_MEAL_TITLE;
+
   // Map dining hall codes to display names
   const formatDiningHall = (hall: string): string => {
     const diningHallMap: { [key: string]: string } = {
@@ -55,7 +59,7 @@ export default function MealOptionCard({
           {formatDiningHall(diningHall)}
         </Text>
         
-        {onAddMeal && (
+        {onAddMeal && !isUnavailable && (
           <TouchableOpacity 
             onPress={onAddMeal}
             disabled={isAdding}

@@ -7,7 +7,53 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-const openai = new OpenAI(); 
+const openai = new OpenAI();
+
+const UNAVAILABLE_MEAL_CARD = {
+    Meal_Option: "No Recommendations Available",
+    Description: "Meal recommendations are currently unavailable. Please try again later.",
+    Entrees: []
+};
+
+const DINING_HALL_KEYS = [
+    "Yahentamitisi_Dining_Hall",
+    "South_Campus_Dining_Hall",
+    "North_251_Dining_Hall"
+];
+
+function buildUnavailableMealSlot() {
+    return Object.fromEntries(
+        DINING_HALL_KEYS.map((hall) => [hall, [{ ...UNAVAILABLE_MEAL_CARD }]])
+    );
+}
+
+function buildUnavailableDayPlan(meals) {
+    const plan = {};
+    for (const meal of meals) {
+        plan[meal] = buildUnavailableMealSlot();
+    }
+    return plan;
+}
+
+function isQuotaOrRateLimitError(error) {
+    const message = String(error?.message || error?.code || error || "").toLowerCase();
+    return (
+        message.includes("quota") ||
+        message.includes("rate limit") ||
+        message.includes("rate_limit") ||
+        message.includes("resource exhausted") ||
+        message.includes("too many requests") ||
+        message.includes("insufficient_quota") ||
+        message.includes("billing") ||
+        message.includes("exceeded")
+    );
+}
+
+function isFailedBatchMealResult(mealPlan) {
+    if (!mealPlan || mealPlan.error) return true;
+    if (isQuotaOrRateLimitError(mealPlan.error)) return true;
+    return false;
+}
 
 async function copyNextMealPlanToMealPlan() {
     console.log("=== Copying nextMealPlan to mealPlan ===");
@@ -37,20 +83,7 @@ async function copyNextMealPlanToMealPlan() {
 }
 
 async function setUnavailableMealPlans(allUsers, meals) {
-    const unavailableCard = {
-        Meal_Option: "No Recommendations Available",
-        Description: "Meal recommendations are currently unavailable. Please try again later.",
-        Entrees: []
-    };
-
-    const unavailablePlan = {};
-    for (const meal of meals) {
-        unavailablePlan[meal] = {
-            Yahentamitisi_Dining_Hall: [unavailableCard],
-            South_Campus_Dining_Hall: [unavailableCard],
-            North_251_Dining_Hall: [unavailableCard]
-        };
-    }
+    const unavailablePlan = buildUnavailableDayPlan(meals);
 
     for (const user of allUsers) {
         try {
@@ -182,9 +215,12 @@ async function main() {
       }
     }
 
-    const batchData = []
+    const batchData = [];
+    /** @type {Record<string, Record<string, object>>} */
+    const precomputedByUser = {};
 
     for (const user_data of allUsers) {
+        precomputedByUser[user_data.username] = {};
         const user_query = user_data.username + " is a " + user_data.gender + " who is " + user_data.height + " inches tall, " + user_data.weight + " pounds, and " + user_data.age + " years old. " + 
         "Their goal is to " + user_data.goal + " and they workout " + user_data.frequency + " times a week. They have a " + user_data.diet + " diet and '" + user_data.other + 
         "allergies/dietary restrictions."
@@ -220,6 +256,12 @@ async function main() {
                 }
             });
     
+            if (allMenuData.length === 0) {
+                console.warn(`No menu for ${user_data.username} / ${meal} — using unavailable placeholder (skipped batch).`);
+                precomputedByUser[user_data.username][meal] = buildUnavailableMealSlot();
+                continue;
+            }
+
             const menuJson = JSON.stringify(allMenuData); 
 
             const prompt = "Using the attached dining hall nutrition database generate meal options for the users at all 3 dining halls (South Campus, Yahentamitsi Dining Hall, and 251 North)" +
@@ -231,6 +273,13 @@ async function main() {
 
             batchData.push({"custom_id": user_data.username + "_" + meal, "method": "POST", "url": "/v1/responses", "body": {"model": "gpt-5-mini", "instructions": system_prompt, "input": prompt, "text": schema}})
         }
+    }
+
+    // Nothing to send to OpenAI — save placeholders + any precomputed meals only
+    if (batchData.length === 0) {
+        console.warn("No batch requests to submit (all meals empty or skipped). Saving merged plans.");
+        await saveMealPlansToDatabase(allUsers, meals, {}, precomputedByUser);
+        return;
     }
 
     const batchInput = batchData.map(obj => JSON.stringify(obj)).join("\n") + "\n";
@@ -250,62 +299,68 @@ async function main() {
         const mealPlansByUser = await checkBatchStatusAndRetrieveResults(openai, batch.id);
 
         if (mealPlansByUser) {
-            await saveMealPlansToDatabase(mealPlansByUser);
+            await saveMealPlansToDatabase(allUsers, meals, mealPlansByUser, precomputedByUser);
         } else {
             console.warn("Batch returned no results. Setting unavailable meal plans.");
             await setUnavailableMealPlans(allUsers, meals);
         }
     } catch (error) {
         console.error("OpenAI API error:", error.message || error);
+        if (isQuotaOrRateLimitError(error)) {
+            console.warn("Quota/rate limit during batch submit — using unavailable meal plans.");
+        }
         await setUnavailableMealPlans(allUsers, meals);
     }
 }
 
-async function saveMealPlansToDatabase(mealPlansByUser) {
+async function saveMealPlansToDatabase(allUsers, meals, mealPlansByUser, precomputedByUser = {}) {
     console.log("\n=== Saving Meal Plans to Database ===");
-    
-    for (const [username, mealPlanData] of Object.entries(mealPlansByUser)) {
+
+    for (const user of allUsers) {
+        const username = user.username;
+
         try {
-            // Check if user exists
-            const user = await prisma.user.findUnique({
-                where: { username: username }
-            });
-            
-            if (!user) {
-                console.warn(`User ${username} not found in database, skipping...`);
-                continue;
-            }
-            
-            // Filter out meal plans that have errors
-            const validMealPlanData = {};
-            for (const [mealType, mealPlan] of Object.entries(mealPlanData)) {
-                if (mealPlan && !mealPlan.error) {
-                    validMealPlanData[mealType] = mealPlan;
+            const batchMeals = mealPlansByUser[username] || {};
+            const precomputed = precomputedByUser[username] || {};
+            const mergedPlan = {};
+            let generatedCount = 0;
+            let placeholderCount = 0;
+
+            for (const mealType of meals) {
+                if (precomputed[mealType]) {
+                    mergedPlan[mealType] = precomputed[mealType];
+                    placeholderCount++;
+                } else if (batchMeals[mealType] && !isFailedBatchMealResult(batchMeals[mealType])) {
+                    mergedPlan[mealType] = batchMeals[mealType];
+                    generatedCount++;
                 } else {
-                    console.warn(`Skipping ${mealType} for ${username} due to error`);
+                    if (batchMeals[mealType]?.error) {
+                        const errMsg = batchMeals[mealType].error?.message || JSON.stringify(batchMeals[mealType].error);
+                        console.warn(`Batch failed for ${username} / ${mealType}: ${errMsg}`);
+                    } else if (!batchMeals[mealType]) {
+                        console.warn(`Missing batch result for ${username} / ${mealType}`);
+                    }
+                    mergedPlan[mealType] = buildUnavailableMealSlot();
+                    placeholderCount++;
                 }
             }
-            
-            // Only update if we have at least one valid meal plan
-            if (Object.keys(validMealPlanData).length > 0) {
-                await prisma.user.update({
-                    where: { username: username },
-                    data: {
-                        nextMealPlan: validMealPlanData,
-                        mealPlanPopulated: true
-                    }
-                });
-                
-                console.log(`✓ Saved meal plan for ${username} (${Object.keys(validMealPlanData).length} meals: ${Object.keys(validMealPlanData).join(", ")})`);
-            } else {
-                console.warn(`No valid meal plans found for ${username}, skipping database update`);
-            }
-            
+
+            await prisma.user.update({
+                where: { username },
+                data: {
+                    nextMealPlan: mergedPlan,
+                    mealPlanPopulated: true
+                }
+            });
+
+            console.log(
+                `✓ Saved meal plan for ${username} (${generatedCount} generated, ${placeholderCount} placeholder)`
+            );
         } catch (error) {
             console.error(`Error saving meal plan for ${username}:`, error);
         }
     }
-    
+
     console.log("=== Finished Saving Meal Plans ===\n");
 }
 
@@ -360,17 +415,16 @@ function processBatchResults(fileContents) {
                         }
                     }
                 } else if (responseBody.error) {
-                    // Handle errors
                     console.error(`Error for ${customId}:`, responseBody.error);
                     resultsByUser[username][mealType] = { error: responseBody.error };
                 }
             } else if (result.response && result.response.status_code !== 200) {
                 console.error(`Non-200 status for ${customId}:`, result.response.status_code);
-                if (result.response.body && result.response.body.error) {
-                    resultsByUser[username][mealType] = { error: result.response.body.error };
-                }
+                const err = result.response.body?.error || { message: `HTTP ${result.response.status_code}` };
+                resultsByUser[username][mealType] = { error: err };
             } else {
                 console.warn(`No valid response found for ${customId}`);
+                resultsByUser[username][mealType] = { error: { message: "No valid response in batch output" } };
             }
             
         } catch (error) {
