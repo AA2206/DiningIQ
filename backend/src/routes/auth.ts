@@ -10,13 +10,44 @@ export const authRouter = express.Router();
 
 const googleClient = new OAuth2Client();
 
+/** Resolve Google OAuth client IDs (Railway names, with EXPO_PUBLIC_* fallback from .env). */
+function resolveGoogleClientIds() {
+  const ios =
+    process.env.GOOGLE_IOS_CLIENT_ID?.trim() ||
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
+  const web =
+    process.env.GOOGLE_WEB_CLIENT_ID?.trim() ||
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+  return { ios, web };
+}
+
 /** Audiences for Google ID tokens — iOS client and web client (Android uses web). */
 function getGoogleTokenAudiences(): string[] {
-  return [
-    process.env.GOOGLE_IOS_CLIENT_ID,
-    process.env.GOOGLE_WEB_CLIENT_ID,
-  ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+  const { ios, web } = resolveGoogleClientIds();
+  return [ios, web].filter((id): id is string => typeof id === 'string' && id.length > 0);
 }
+
+// GET /health/google-config — safe check that Railway env vars are loaded (no secret values)
+authRouter.get('/health/google-config', (_req: Request, res: Response) => {
+  const { ios, web } = resolveGoogleClientIds();
+  res.json({
+    iosConfigured: Boolean(ios),
+    webConfigured: Boolean(web),
+    audienceCount: getGoogleTokenAudiences().length,
+    source: {
+      ios: process.env.GOOGLE_IOS_CLIENT_ID?.trim()
+        ? 'GOOGLE_IOS_CLIENT_ID'
+        : ios
+          ? 'EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'
+          : 'none',
+      web: process.env.GOOGLE_WEB_CLIENT_ID?.trim()
+        ? 'GOOGLE_WEB_CLIENT_ID'
+        : web
+          ? 'EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID'
+          : 'none',
+    },
+  });
+});
 
 // POST /register
 authRouter.post('/register', async (req: Request, res: Response) => {
