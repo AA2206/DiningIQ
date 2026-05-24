@@ -4,21 +4,53 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import appleSignin from 'apple-signin-auth';
+import { GOOGLE_OAUTH_CLIENT_IDS } from '../config/googleOAuth';
 import { prisma } from '../lib/prisma';
 
 export const authRouter = express.Router();
 
 const googleClient = new OAuth2Client();
 
-/** Resolve Google OAuth client IDs (Railway names, with EXPO_PUBLIC_* fallback from .env). */
-function resolveGoogleClientIds() {
-  const ios =
-    process.env.GOOGLE_IOS_CLIENT_ID?.trim() ||
-    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
-  const web =
-    process.env.GOOGLE_WEB_CLIENT_ID?.trim() ||
-    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
-  return { ios, web };
+type GoogleIdSource = 'env' | 'expo_env' | 'fallback';
+
+/** Resolve Google OAuth client IDs from env, then EXPO_PUBLIC_*, then baked-in public IDs. */
+function resolveGoogleClientIds(): {
+  ios: string;
+  web: string;
+  iosSource: GoogleIdSource;
+  webSource: GoogleIdSource;
+} {
+  const iosEnv = process.env.GOOGLE_IOS_CLIENT_ID?.trim();
+  const webEnv = process.env.GOOGLE_WEB_CLIENT_ID?.trim();
+  const iosExpo = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
+  const webExpo = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+
+  if (iosEnv) {
+    return {
+      ios: iosEnv,
+      web: webEnv || webExpo || GOOGLE_OAUTH_CLIENT_IDS.web,
+      iosSource: 'env',
+      webSource: webEnv ? 'env' : webExpo ? 'expo_env' : 'fallback',
+    };
+  }
+  if (iosExpo) {
+    return {
+      ios: iosExpo,
+      web: webEnv || webExpo || GOOGLE_OAUTH_CLIENT_IDS.web,
+      iosSource: 'expo_env',
+      webSource: webEnv ? 'env' : webExpo ? 'expo_env' : 'fallback',
+    };
+  }
+
+  console.warn(
+    '[auth] GOOGLE_IOS_CLIENT_ID / GOOGLE_WEB_CLIENT_ID not in process.env — using public client ID fallback. Fix Railway service variables.'
+  );
+  return {
+    ios: GOOGLE_OAUTH_CLIENT_IDS.ios,
+    web: webEnv || webExpo || GOOGLE_OAUTH_CLIENT_IDS.web,
+    iosSource: 'fallback',
+    webSource: webEnv ? 'env' : webExpo ? 'expo_env' : 'fallback',
+  };
 }
 
 /** Audiences for Google ID tokens — iOS client and web client (Android uses web). */
@@ -29,23 +61,17 @@ function getGoogleTokenAudiences(): string[] {
 
 // GET /health/google-config — safe check that Railway env vars are loaded (no secret values)
 authRouter.get('/health/google-config', (_req: Request, res: Response) => {
-  const { ios, web } = resolveGoogleClientIds();
+  const { ios, web, iosSource, webSource } = resolveGoogleClientIds();
   res.json({
     iosConfigured: Boolean(ios),
     webConfigured: Boolean(web),
     audienceCount: getGoogleTokenAudiences().length,
-    source: {
-      ios: process.env.GOOGLE_IOS_CLIENT_ID?.trim()
-        ? 'GOOGLE_IOS_CLIENT_ID'
-        : ios
-          ? 'EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID'
-          : 'none',
-      web: process.env.GOOGLE_WEB_CLIENT_ID?.trim()
-        ? 'GOOGLE_WEB_CLIENT_ID'
-        : web
-          ? 'EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID'
-          : 'none',
-    },
+    iosSource,
+    webSource,
+    googleEnvKeys: Object.keys(process.env).filter((k) =>
+      /GOOGLE|EXPO_PUBLIC_GOOGLE/.test(k)
+    ),
+    railway: Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME),
   });
 });
 
@@ -121,10 +147,6 @@ authRouter.post('/google-auth', async (req: Request, res: Response) => {
 
   try {
     const audiences = getGoogleTokenAudiences();
-    if (audiences.length === 0) {
-      console.error('Google OAuth client IDs are not configured on the server');
-      return res.status(500).json({ error: 'Google sign-in is not configured' });
-    }
 
     const ticket = await googleClient.verifyIdToken({
       idToken,
