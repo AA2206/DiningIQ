@@ -17,6 +17,11 @@ export type EnvHealthReport = {
   railway: boolean;
   allInjected: boolean;
   variables: Record<BackendEnvVar, EnvVarStatus>;
+  /** Total keys in process.env — useful if Railway stops injecting new vars. */
+  envKeyCount: number;
+  /** Env key names only (no values) — catches typos like GOOGLE_IOS_CLIENTID. */
+  googleRelatedKeys: string[];
+  expoGoogleKeys: string[];
 };
 
 export function isEnvInjected(key: string): boolean {
@@ -29,9 +34,14 @@ export function buildEnvHealthReport(): EnvHealthReport {
     BACKEND_ENV_VARS.map((name) => [name, { injected: isEnvInjected(name) }])
   ) as Record<BackendEnvVar, EnvVarStatus>;
 
+  const envKeys = Object.keys(process.env);
+
   return {
     railway: Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME),
     allInjected: BACKEND_ENV_VARS.every((name) => variables[name].injected),
     variables,
+    envKeyCount: envKeys.length,
+    googleRelatedKeys: envKeys.filter((k) => /GOOGLE/i.test(k)),
+    expoGoogleKeys: envKeys.filter((k) => /EXPO_PUBLIC_GOOGLE/i.test(k)),
   };
 }
