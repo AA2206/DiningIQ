@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import appleSignin from 'apple-signin-auth';
 import { GOOGLE_OAUTH_CLIENT_IDS } from '../config/googleOAuth';
+import { buildEnvHealthReport } from '../lib/envHealth';
 import { prisma } from '../lib/prisma';
 
 export const authRouter = express.Router();
@@ -58,6 +59,15 @@ function getGoogleTokenAudiences(): string[] {
   const { ios, web } = resolveGoogleClientIds();
   return [ios, web].filter((id): id is string => typeof id === 'string' && id.length > 0);
 }
+
+// GET /health/env — check Railway variables are injected (no secret values)
+authRouter.get('/health/env', (_req: Request, res: Response) => {
+  const { iosSource, webSource } = resolveGoogleClientIds();
+  res.json({
+    ...buildEnvHealthReport(),
+    googleOAuth: { iosSource, webSource },
+  });
+});
 
 // GET /health/google-config — safe check that Railway env vars are loaded (no secret values)
 authRouter.get('/health/google-config', (_req: Request, res: Response) => {
