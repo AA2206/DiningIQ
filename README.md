@@ -2,11 +2,13 @@
 
 **AI-powered meal planning for university dining halls.**
 
+[![Download on the App Store](https://img.shields.io/badge/Download_on_the-App_Store-0D96F6?logo=apple&logoColor=white)](https://apps.apple.com/app/diningiq/id6757298851)
+
 DiningIQ builds personalized daily meal plans from real dining-hall nutrition data. Students complete a short onboarding (goals, body metrics, diet preferences), and the app uses LLMs to recommend meals across campus dining halls that fit their macros and dietary needs — then lets them log what they eat and track their nutrition over time.
 
 Built for the University of Maryland dining halls (South Campus, Yahentamitsi, and 251 North), with an architecture that generalizes to any dining-hall dataset.
 
-> **Status:** Personal project / MVP. iOS + Android via Expo, with a Node/Express backend deployed on Railway.
+> **Status:** Personal project / MVP. Built with Expo (iOS + Android + web); currently published to the [iOS App Store](https://apps.apple.com/app/diningiq/id6757298851). Node/Express backend deployed on Railway.
 
 ---
 
