@@ -12,11 +12,11 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Only review PRs whose branch lives in THIS repo (not forks). On a public repo,
+    # outside contributors always open PRs from a fork, so this blocks strangers from
+    # triggering reviews that consume your Claude usage. Collaborators who push branches
+    # directly to the repo still get automatic reviews.
+    if: github.event.pull_request.head.repo.full_name == github.repository
 
     runs-on: ubuntu-latest
     permissions:

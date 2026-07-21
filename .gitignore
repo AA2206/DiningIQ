@@ -34,6 +34,10 @@ yarn-error.*
 .env
 .env*.local
 
+# generated meal-plan / dining data dumps
+backend/src/Meal-Plan/*.jsonl
+backend/src/Meal-Plan/meal_plans_by_user.json
+
 # typescript
 *.tsbuildinfo
 

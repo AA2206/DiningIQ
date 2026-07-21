@@ -1,50 +1,169 @@
-# Welcome to your Expo app 👋
+# DiningIQ 🍽️
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**AI-powered meal planning for university dining halls.**
 
-## Get started
+DiningIQ builds personalized daily meal plans from real dining-hall nutrition data. Students complete a short onboarding (goals, body metrics, diet preferences), and the app uses LLMs to recommend meals across campus dining halls that fit their macros and dietary needs — then lets them log what they eat and track their nutrition over time.
 
-1. Install dependencies
+Built for the University of Maryland dining halls (South Campus, Yahentamitsi, and 251 North), with an architecture that generalizes to any dining-hall dataset.
 
-   ```bash
-   npm install
-   ```
+> **Status:** Personal project / MVP. iOS + Android via Expo, with a Node/Express backend deployed on Railway.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Screenshots
 
-In the output, you'll find options to open the app in a
+| Meal plans per dining hall | Meal logging & macros | Weekly analytics |
+|:--:|:--:|:--:|
+| ![Personalized meal recommendations at each dining hall](assets/screenshots/meal-plan.jpg) | ![Log meals and track macros](assets/screenshots/meal-logging.jpg) | ![Track weekly progress through graphs and statistics](assets/screenshots/analytics.jpg) |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Features
 
-## Get a fresh project
+- 🎯 **Personalized onboarding** — gender, height/weight/age, fitness goal (lose weight / maintain / build muscle), diet type (vegetarian, vegan, omnivore, keto, …), and dining frequency.
+- 🤖 **AI meal-plan generation** — LLM-generated meal recommendations per dining hall, grounded in the real nutrition database, with breakfast / lunch / dinner / brunch options.
+- 📊 **Macro & nutrition analytics** — weekly macro breakdowns and meal statistics.
+- 📝 **Meal logging** — log meals, adjust serving sizes, and track intake against goals.
+- 🔐 **Multiple sign-in options** — Google Sign-In, Apple Sign-In, and username/passcode (JWT-based).
+- 📱 **Cross-platform** — one Expo codebase for iOS, Android, and web.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## Tech Stack
+
+**Mobile app (root)**
+- [Expo](https://expo.dev) (SDK 54) + [React Native](https://reactnative.dev) 0.81 / React 19
+- [Expo Router](https://docs.expo.dev/router/introduction) — file-based routing
+- [NativeWind](https://www.nativewind.dev) (Tailwind CSS for React Native)
+- TypeScript
+
+**Backend (`/backend`)**
+- [Node.js](https://nodejs.org) + [Express 5](https://expressjs.com) (TypeScript)
+- [Prisma ORM](https://www.prisma.io) + PostgreSQL
+- JWT auth + bcrypt, Google/Apple OAuth verification
+- LLM providers: OpenAI + Google Gemini (via the Vercel AI SDK)
+
+**Infrastructure**
+- Backend hosted on [Railway](https://railway.app)
+- Mobile builds via [EAS](https://expo.dev/eas)
+- GitHub Actions for scheduled meal generation and automated code review
+
+---
+
+## Project Structure
+
+```
+DiningIQ/
+├── app/                    # Expo Router screens (mobile app)
+│   ├── onboarding/         # gender, metrics, goal, diet, frequency
+│   ├── account/            # profile, meal plan, meal logging, macros analytics
+│   └── meal-option/        # meal detail view
+├── components/             # Shared UI components
+├── lib/                    # Client-side helpers (API client, auth)
+├── assets/                 # Images, icons, fonts
+├── backend/
+│   └── src/
+│       ├── routes/         # auth, user, mealPlan, mealLogging
+│       ├── services/       # meal plan generation service
+│       ├── Meal-Plan/      # batch meal-generation & dining-data scripts
+│       ├── middleware/     # auth middleware
+│       ├── lib/            # Prisma client
+│       └── index.ts        # Express entry point
+└── .github/workflows/      # scheduled jobs + CI
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+### Prerequisites
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Node.js 20+
+- A PostgreSQL database
+- API keys: OpenAI and/or Google Gemini, plus Google & Apple OAuth credentials
+- **Your own dining-hall nutrition dataset** (see below) — the UMD dining data is **not** included in this repo
 
-## Join the community
+### 1. Backend
 
-Join our community of developers creating universal apps.
+```bash
+cd backend
+npm install
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Configure environment (see below), then set up the database
+npx prisma generate
+npx prisma migrate dev
+
+npm run dev        # start the API on http://localhost:3000
+```
+
+Create `backend/.env`:
+
+```env
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
+JWT_SECRET=your-strong-random-secret
+OPENAI_API_KEY=sk-...
+GOOGLE_GENERATIVE_AI_API_KEY=...          # for Gemini meal generation
+GOOGLE_IOS_CLIENT_ID=...apps.googleusercontent.com
+GOOGLE_WEB_CLIENT_ID=...apps.googleusercontent.com
+APPLE_BUNDLE_ID=com.dietiq.app
+PORT=3000
+```
+
+### 2. Mobile app
+
+```bash
+# from the repo root
+npm install
+npx expo start
+```
+
+Create `.env` in the repo root:
+
+```env
+EXPO_PUBLIC_API_BASE_URL=http://localhost:3000
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=...apps.googleusercontent.com
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=...apps.googleusercontent.com
+```
+
+> `EXPO_PUBLIC_*` variables are **bundled into the client app** and are not secret. Real secrets (database URL, API keys, JWT secret) live only in the backend environment.
+
+From the Expo dev server you can open the app in an iOS simulator, Android emulator, [Expo Go](https://expo.dev/go), or a development build.
+
+### 3. Dining data
+
+DiningIQ generates meal plans from a **dining-hall nutrition database** — the entrees, descriptions, and nutrition facts the LLM grounds its recommendations in. **This dataset is not included in the repo** and is specific to the University of Maryland dining halls it was built for.
+
+To run DiningIQ against your own campus (or any dining provider), you'll need to supply your own data: populate the database with your dining halls, entrees, and nutrition info so the meal-generation prompts have something to draw from. The scripts in `backend/src/Meal-Plan/` show the expected shape and how the data feeds into generation.
+
+---
+
+## API Overview
+
+The Express backend exposes a REST API. Selected endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/register`, `/login` | Username/passcode auth |
+| `POST` | `/google-auth`, `/apple-auth` | OAuth sign-in |
+| `POST` | `/add-metrics`, `/update-field` | Onboarding & profile |
+| `POST` | `/generate-meal-plan` | Trigger AI meal-plan generation |
+| `GET`  | `/get-meal-plan`, `/generation-status` | Fetch plan / poll status |
+| `POST` | `/modify-meal-plan` | Regenerate or adjust a plan |
+| `POST` | `/add-meal`, `DELETE /remove-meal` | Meal logging |
+| `PUT`  | `/increase-serving`, `/decrease-serving`, `/update-meal` | Adjust logged meals |
+| `GET`  | `/weekly-macros`, `/fetch-meal-stats` | Nutrition analytics |
+| `DELETE` | `/delete-account` | Account deletion |
+
+---
+
+## Automated Jobs (GitHub Actions)
+
+- **Daily meal generation** (`cron.yml`) — regenerates meal plans on a schedule.
+- **Copy dining data** (`copy-dining-data.yml`) — refreshes the dining-hall nutrition dataset.
+- **Claude Code Review** (`claude.yml`, `claude-code-review.yml`) — AI code review, gated to trusted contributors.
+
+---
+
+## License
+
+This project is currently unlicensed (all rights reserved). If you'd like to use or build on it, please reach out.
