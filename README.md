@@ -161,9 +161,3 @@ The Express backend exposes a REST API. Selected endpoints:
 - **Daily meal generation** (`cron.yml`) — regenerates meal plans on a schedule.
 - **Copy dining data** (`copy-dining-data.yml`) — refreshes the dining-hall nutrition dataset.
 - **Claude Code Review** (`claude.yml`, `claude-code-review.yml`) — AI code review, gated to trusted contributors.
-
----
-
-## License
-
-This project is currently unlicensed (all rights reserved). If you'd like to use or build on it, please reach out.
