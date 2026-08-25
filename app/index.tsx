@@ -415,14 +415,14 @@ export default function Index() {
             By continuing, you agree to our{' '}
             <Text 
               className="underline"
-              onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/privacy-policy')}
+              onPress={() => Linking.openURL('https://sites.google.com/view/dining-iq/privacy-policy')}
             >
               Privacy Policy
             </Text>
             {' '}and{' '}
             <Text 
               className="underline"
-              onPress={() => Linking.openURL('https://sites.google.com/dining-iq.com/legal/terms-of-service')}
+              onPress={() => Linking.openURL('https://sites.google.com/view/dining-iq/terms-of-service')}
             >
               Terms and Conditions
             </Text>
