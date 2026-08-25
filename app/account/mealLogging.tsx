@@ -1,5 +1,5 @@
 // app/account/mealLogging.tsx
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView } from "react-native";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
@@ -1073,9 +1073,9 @@ export default function MealLogging() {
         onRequestClose={handleCloseModal}
       >
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior="padding"
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+          keyboardVerticalOffset={0}
         >
           <View className="flex-1 bg-black/50 items-center justify-center px-4">
             <View className="bg-white rounded-2xl w-full max-w-md p-6" style={{ maxHeight: '90%' }}>
